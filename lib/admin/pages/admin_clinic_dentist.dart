@@ -53,7 +53,7 @@ class _ClinicDentistsPageState extends State<ClinicDentistsPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : dentists.isEmpty
-              ? const Center(child: Text('No dentists sadasd found.'))
+              ? const Center(child: Text('No dentists found.'))
               : ListView.builder(
                   itemCount: dentists.length,
                   itemBuilder: (context, index) {

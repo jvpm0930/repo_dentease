@@ -1,14 +1,161 @@
+import 'package:dentease/staff/staff_clinic_details.dart';
+import 'package:dentease/staff/staff_dentist_list.dart';
+import 'package:dentease/staff/staff_list.dart';
+import 'package:dentease/widgets/background_cont.dart';
+import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
+import 'package:dentease/widgets/staffWidgets/staff_header.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class StaffPage extends StatelessWidget {
+class StaffPage extends StatefulWidget {
   const StaffPage({super.key});
 
   @override
+  _StaffPageState createState() => _StaffPageState();
+}
+
+class _StaffPageState extends State<StaffPage> {
+  String? userEmail;
+  String? clinicId;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails();
+  }
+
+  Future<void> _fetchUserDetails() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+
+    if (user == null || user.email == null) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    userEmail = user.email; // Ensure userEmail is assigned
+
+    try {
+      final response = await supabase
+          .from('staffs')
+          .select('clinic_id')
+          .eq('email', userEmail!) // Ensure userEmail is not null
+          .maybeSingle();
+
+      if (response != null && response['clinic_id'] != null) {
+        setState(() {
+          clinicId = response['clinic_id'].toString();
+        });
+      }
+    } catch (error) {
+      print("Error fetching clinic ID: $error");
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  /// 🔹 **Reusable Custom Button**
+  Widget _buildCustomButton(
+      {required String title, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[100], // Light background
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.black54),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Staff Dashboard')),
-      body: Center(
-        child: Text('Welcome, Staff!', style: TextStyle(fontSize: 24)),
+    return BackgroundCont(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          children: [
+            const StaffHeader(),
+            if (isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (clinicId != null)
+              Positioned(
+                top: 180,
+                left: 20,
+                right: 20,
+                child: Column(
+                  children: [
+                    _buildCustomButton(
+                      title: "Clinic Details",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StaffClinicPage(clinicId: clinicId!),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildCustomButton(
+                      title: "All Dentists",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StaffDentListPage(clinicId: clinicId!),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildCustomButton(
+                      title: "All Staff",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StaffListPage(clinicId: clinicId!),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            const StaffFooter(),
+          ],
+        ),
       ),
     );
   }

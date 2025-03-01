@@ -1,12 +1,12 @@
-import 'package:dentease/admin/admin_dentease_list.dart';
-import 'package:dentease/dentist/clinicSignup/dental_apply_frst.dart';
+import 'package:dentease/admin/pages/clinics/admin_dentease_first.dart';
+import 'package:dentease/clinic/ownerSignup/dental_apply_frst.dart';
 import 'package:dentease/staff/staff_page.dart';
 import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../dentist/dentist_page.dart';
 import '../patients/patient_page.dart';
-import '../patients/signup_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,59 +34,101 @@ class _LoginScreenState extends State<LoginScreen> {
       final userId = response.user?.id;
       if (userId == null) throw 'Login failed';
 
+      String? userEmail;
+
       // Check role in `profiles` table
-      final profileRoleResponse = await supabase
+      final profileResponse = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, email')
           .eq('id', userId)
           .maybeSingle();
 
-      if (profileRoleResponse != null && profileRoleResponse['role'] != null) {
-        final role = profileRoleResponse['role'];
+      if (profileResponse != null) {
+        final role = profileResponse['role'];
+        userEmail = profileResponse['email'];
 
         if (role == 'admin') {
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Logged in as $userEmail')),
+          );
+
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => AdminPage()));
+            context,
+            MaterialPageRoute(
+              builder: (_) => AdminPage(),
+            ),
+          );
           return;
-        } 
+        }
       }
 
-      // Check role in `patient` table
+      // Check role in `patients` table
       final patientResponse = await supabase
           .from('patients')
-          .select('role')
+          .select('role, email')
           .eq('patient_id', userId)
           .maybeSingle();
 
       if (patientResponse != null) {
+        userEmail = patientResponse['email'];
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Logged in as $userEmail')),
+        );
+
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => PatientPage()));
-        return; 
+          context,
+          MaterialPageRoute(
+            builder: (_) => PatientPage(),
+          ),
+        );
+        return;
       }
 
       // Check role in `dentists` table
       final dentistResponse = await supabase
           .from('dentists')
-          .select('role')
+          .select('role, email')
           .eq('dentist_id', userId)
           .maybeSingle();
 
       if (dentistResponse != null) {
+        userEmail = dentistResponse['email'];
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Logged in as $userEmail')),
+        );
+
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => DentistPage()));
+          context,
+          MaterialPageRoute(
+            builder: (_) => DentistPage(),
+          ),
+        );
         return;
       }
 
-      // Check role in `staff` table
+      // Check role in `staffs` table
       final staffResponse = await supabase
           .from('staffs')
-          .select('role')
+          .select('role, email')
           .eq('staff_id', userId)
           .maybeSingle();
 
       if (staffResponse != null) {
+        userEmail = staffResponse['email'];
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Logged in as $userEmail')),
+        );
+
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => StaffPage()));
+          context,
+          MaterialPageRoute(
+            builder: (_) => StaffPage(),
+          ),
+        );
         return;
       }
 
@@ -98,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

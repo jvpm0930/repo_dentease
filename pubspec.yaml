@@ -10,7 +10,7 @@ dependencies:
   uuid: ^4.2.1
   google_maps_flutter: ^2.2.2
   geolocator: ^13.0.2
-  meta: 1.15.0
+  meta: 1.16.0
   flutter:
     sdk: flutter
 

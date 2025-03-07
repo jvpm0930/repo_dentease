@@ -5,7 +5,7 @@ import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../dentist/dentist_page.dart';
-import '../patients/patient_page.dart';
+import '../patients/patient_pagev2.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -112,12 +112,14 @@ class _LoginScreenState extends State<LoginScreen> {
       // Check role in `staffs` table
       final staffResponse = await supabase
           .from('staffs')
-          .select('role, email')
+          .select('role, email, clinic_id, staff_id') // Fetch staff_id
           .eq('staff_id', userId)
           .maybeSingle();
 
       if (staffResponse != null) {
         userEmail = staffResponse['email'];
+        String clinicId = staffResponse['clinic_id']; // Get clinic_id
+        String staffId = staffResponse['staff_id']; // Get staff_id
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Logged in as $userEmail')),
@@ -126,11 +128,13 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => StaffPage(),
+            builder: (_) =>
+                StaffPage(clinicId: clinicId, staffId: staffId), // Pass staffId
           ),
         );
         return;
       }
+
 
       // If no role found
       throw 'User role not found in any table';

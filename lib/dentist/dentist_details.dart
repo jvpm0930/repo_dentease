@@ -70,7 +70,7 @@ class _DentistDetailsPageState extends State<DentistDetailsPage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
         title: const Text(
-          "Dentist Details",
+          "My Profile",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,

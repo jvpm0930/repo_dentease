@@ -1,4 +1,4 @@
-import 'package:dentease/patients/patient_page.dart';
+import 'package:dentease/patients/patient_pagev2.dart';
 import 'package:flutter/material.dart';
 
 class PatientFooter extends StatelessWidget {

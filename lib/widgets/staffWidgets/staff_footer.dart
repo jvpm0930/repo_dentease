@@ -1,8 +1,12 @@
+import 'package:dentease/staff/staff_bookings_pend.dart';
+import 'package:dentease/staff/staff_details.dart';
 import 'package:dentease/staff/staff_page.dart';
 import 'package:flutter/material.dart';
 
 class StaffFooter extends StatelessWidget {
-  const StaffFooter({super.key});
+  final String staffId;
+  final String clinicId;
+  const StaffFooter({super.key, required this.staffId, required this.clinicId});
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +33,13 @@ class StaffFooter extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildNavImage('assets/icons/home.png', context, StaffPage()),
+                _buildNavImage('assets/icons/home.png', context, StaffPage(clinicId: clinicId, staffId: staffId)),
                 _buildNavImage(
-                    'assets/icons/calendar.png', context,  StaffPage()),
-                _buildNavImage('assets/icons/chat.png', context,  StaffPage()),
+                    'assets/icons/calendar.png', context,  StaffBookingRequestsPage(
+                        clinicId: clinicId, staffId: staffId)),
+                _buildNavImage('assets/icons/chat.png', context,  StaffDetailsPage(staffId: staffId)),
                 _buildNavImage(
-                    'assets/icons/profile.png', context,  StaffPage()),
+                    'assets/icons/profile.png', context,  StaffDetailsPage(staffId: staffId)),
               ],
             ),
           ),

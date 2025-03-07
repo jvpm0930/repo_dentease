@@ -15,7 +15,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final lastnameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  String selectedRole = 'user'; // Default role
+  String selectedRole = 'patient'; // Default role
 
   final supabase = Supabase.instance.client;
 

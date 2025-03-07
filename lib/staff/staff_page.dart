@@ -1,6 +1,9 @@
 import 'package:dentease/staff/staff_clinic_details.dart';
+import 'package:dentease/staff/staff_clinic_sched.dart';
+import 'package:dentease/staff/staff_clinic_services.dart';
 import 'package:dentease/staff/staff_dentist_list.dart';
 import 'package:dentease/staff/staff_list.dart';
+import 'package:dentease/staff/staff_sched.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
 import 'package:dentease/widgets/staffWidgets/staff_header.dart';
@@ -8,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StaffPage extends StatefulWidget {
-  const StaffPage({super.key});
+  final String clinicId;
+  final String staffId;
+  const StaffPage({super.key, required this.clinicId, required this.staffId});
 
   @override
   _StaffPageState createState() => _StaffPageState();
@@ -17,6 +22,7 @@ class StaffPage extends StatefulWidget {
 class _StaffPageState extends State<StaffPage> {
   String? userEmail;
   String? clinicId;
+  String? staffId;
   bool isLoading = true;
 
   @override
@@ -41,13 +47,14 @@ class _StaffPageState extends State<StaffPage> {
     try {
       final response = await supabase
           .from('staffs')
-          .select('clinic_id')
+          .select('clinic_id, staff_id')
           .eq('email', userEmail!) // Ensure userEmail is not null
           .maybeSingle();
 
       if (response != null && response['clinic_id'] != null) {
         setState(() {
           clinicId = response['clinic_id'].toString();
+          staffId = response['staff_id'].toString();
         });
       }
     } catch (error) {
@@ -127,7 +134,7 @@ class _StaffPageState extends State<StaffPage> {
                       },
                     ),
                     _buildCustomButton(
-                      title: "All Dentists",
+                      title: "Clinic Dentists",
                       onTap: () {
                         Navigator.push(
                           context,
@@ -139,7 +146,7 @@ class _StaffPageState extends State<StaffPage> {
                       },
                     ),
                     _buildCustomButton(
-                      title: "All Staff",
+                      title: "Clinic Staff",
                       onTap: () {
                         Navigator.push(
                           context,
@@ -150,10 +157,38 @@ class _StaffPageState extends State<StaffPage> {
                         );
                       },
                     ),
+                    _buildCustomButton(
+                      title: "Clinic Services",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StaffServListPage(clinicId: clinicId!),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildCustomButton(
+                      title: "Clinic Schedules",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StaffSchedulePage(
+                              clinicId: widget.clinicId,
+                              staffId: widget.staffId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
-            const StaffFooter(),
+            if (staffId != null)
+              StaffFooter(clinicId: widget.clinicId, staffId: staffId!),
           ],
         ),
       ),

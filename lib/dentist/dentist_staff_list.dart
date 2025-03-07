@@ -96,7 +96,7 @@ class _DentStaffListPageState extends State<DentStaffListPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                AddStaff(clinicId: widget.clinicId),
+                                DentAddStaff(clinicId: widget.clinicId),
                           ),
                         );
                       },

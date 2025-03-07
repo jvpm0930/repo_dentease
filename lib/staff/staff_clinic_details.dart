@@ -17,6 +17,7 @@ class StaffClinicPage extends StatefulWidget {
 class _StaffClinicPageState extends State<StaffClinicPage> {
   final supabase = Supabase.instance.client;
   Map<String, dynamic>? clinicDetails;
+  String? staffId;
   bool isLoading = true;
 
   @override
@@ -27,17 +28,29 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
 
   Future<void> _fetchClinicDetails() async {
     try {
-      final response = await supabase
+      final clinicResponse = await supabase
           .from('clinics')
           .select()
           .eq('clinic_id', widget.clinicId)
-          .single();
+          .limit(1) // Ensure at most one result
+          .maybeSingle();
+
+      final dentistResponse = await supabase
+          .from('staffs')
+          .select('staff_id')
+          .eq('clinic_id', widget.clinicId)
+          .limit(1) // Ensure at most one result
+          .maybeSingle();
+
+      if (!mounted) return; // Prevent state updates if widget is disposed
 
       setState(() {
-        clinicDetails = response;
+        clinicDetails = clinicResponse;
+        staffId = dentistResponse?['staff_id'];
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching clinic details: $e')),
       );
@@ -47,7 +60,7 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
     }
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -57,7 +70,7 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           Expanded(
-            child: Text(value,
+            child: Text(value ?? 'N/A',
                 textAlign: TextAlign.right,
                 style: const TextStyle(color: Colors.white, fontSize: 14)),
           ),
@@ -88,39 +101,47 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const SizedBox(height: 30),
-                                _buildDetailRow('Status:',
-                                    clinicDetails?['status'] ?? 'N/A'),
+                                _buildDetailRow(
+                                    'Status:', clinicDetails?['status']),
                                 _buildDetailRow('Clinic Name:',
-                                    clinicDetails?['clinic_name'] ?? 'N/A'),
-                                _buildDetailRow('Address:',
-                                    clinicDetails?['address'] ?? 'N/A'),
-                                if (clinicDetails!['latitude'] != null &&
-                                    clinicDetails!['longitude'] != null)
-                                  const SizedBox(height: 8),
-                                SizedBox(
-                                  height: 150,
-                                  child: GoogleMap(
-                                    initialCameraPosition: CameraPosition(
-                                      target: LatLng(
-                                        clinicDetails!['latitude'],
-                                        clinicDetails!['longitude'],
-                                      ),
-                                      zoom: 15,
-                                    ),
-                                    markers: {
-                                      Marker(
-                                        markerId:
-                                            const MarkerId('clinicLocation'),
-                                        position: LatLng(
-                                          clinicDetails!['latitude'],
-                                          clinicDetails!['longitude'],
+                                    clinicDetails?['clinic_name']),
+                                _buildDetailRow(
+                                    'Address:', clinicDetails?['address']),
+                                if (clinicDetails?['latitude'] != null &&
+                                    clinicDetails?['longitude'] != null)
+                                  Column(
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      SizedBox(
+                                        height: 150,
+                                        child: GoogleMap(
+                                          initialCameraPosition: CameraPosition(
+                                            target: LatLng(
+                                              clinicDetails?['latitude'] ??
+                                                  0.0, // Default value
+                                              clinicDetails?['longitude'] ??
+                                                  0.0,
+                                            ),
+                                            zoom: 15,
+                                          ),
+                                          markers: {
+                                            Marker(
+                                              markerId: const MarkerId(
+                                                  'clinicLocation'),
+                                              position: LatLng(
+                                                clinicDetails?['latitude'] ??
+                                                    0.0,
+                                                clinicDetails?['longitude'] ??
+                                                    0.0,
+                                              ),
+                                            ),
+                                          },
                                         ),
                                       ),
-                                    },
+                                    ],
                                   ),
-                                ),
                                 const SizedBox(height: 8),
-                                if (clinicDetails!['license_url'] != null)
+                                if (clinicDetails?['license_url'] != null)
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -136,7 +157,7 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
                                         child: Image.network(
-                                          clinicDetails!['license_url'],
+                                          clinicDetails?['license_url'],
                                           height: 150,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
@@ -149,7 +170,8 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
                           ),
               ),
             ),
-            const StaffFooter(),
+            if (staffId != null)
+              StaffFooter(clinicId: widget.clinicId, staffId: staffId!),
           ],
         ),
       ),

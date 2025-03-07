@@ -1,3 +1,4 @@
+import 'package:dentease/patients/patient_clinicv2.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,17 +26,14 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
     try {
       final List<dynamic> response = await supabase
           .from('clinics')
-          .select('clinic_id, clinic_name, latitude, longitude, status')
+          .select('clinic_id, clinic_name')
           .eq('status', 'approved'); // Only approved clinics
-
-      print("Fetched Approved Clinics: ${response.length}");
 
       setState(() {
         clinics = List<Map<String, dynamic>>.from(response);
         isLoading = false;
       });
     } catch (e) {
-      print("Error fetching clinics: $e");
       setState(() {
         errorMessage = 'Error fetching clinics: $e';
         isLoading = false;
@@ -51,7 +49,7 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
 
     if (errorMessage.isNotEmpty) {
       return Center(
-          child: Text(errorMessage, style: TextStyle(color: Colors.red)));
+          child: Text(errorMessage, style: const TextStyle(color: Colors.red)));
     }
 
     if (clinics.isEmpty) {
@@ -68,28 +66,27 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
         itemBuilder: (context, index) {
           final clinic = clinics[index];
           final clinicName = clinic['clinic_name'] ?? 'Unknown Clinic';
-          final latitude = clinic['latitude'] ?? 0.0;
-          final longitude = clinic['longitude'] ?? 0.0;
 
-          final mapUrl = _getGoogleMapsUrl(latitude, longitude);
-
-          return _buildClinicCard(
-            context,
-            mapUrl, // Google Maps Image
-            clinicName,
+          return GestureDetector(
+            onTap: () {
+              // Navigate to the details page with only clinic_id
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      PatientClinicInfoPage(clinicId: clinic['clinic_id']),
+                ),
+              );
+            },
+            child: _buildClinicCard(context, clinicName),
           );
         },
       ),
     );
   }
 
-  /// Generates Google Maps Static API URL for clinic location
-  String _getGoogleMapsUrl(double lat, double lon) {
-    return 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lon&zoom=15&size=400x300&maptype=roadmap&markers=color:red%7C$lat,$lon&key=AIzaSyBg-fAm25WSVmO768I42gecvL80vuJiuh4';
-  }
-
   /// Creates a Clickable Clinic Card
-  Widget _buildClinicCard(BuildContext context, String mapUrl, String title) {
+  Widget _buildClinicCard(BuildContext context, String title) {
     return Container(
       width: 180, // Card width
       margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -101,19 +98,18 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
       ),
       child: Column(
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+          Container(
+            width: double.infinity,
+            height: 180,
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-            child: Image.network(
-              mapUrl,
-              width: double.infinity,
-              height: 180,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Image.asset('assets/placeholder_map.png', fit: BoxFit.cover),
-            ),
+            child:
+                Image.asset('assets/logo2.png', width: 100),
           ),
           Container(
             width: double.infinity,

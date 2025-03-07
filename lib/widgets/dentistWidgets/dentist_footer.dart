@@ -1,3 +1,4 @@
+import 'package:dentease/dentist/dentist_bookings_apprv.dart';
 import 'package:dentease/dentist/dentist_details.dart';
 import 'package:dentease/dentist/dentist_page.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,8 @@ class DentistFooter extends StatelessWidget {
             _buildNavImage(
                 'assets/icons/home.png', context, const DentistPage()),
             _buildNavImage('assets/icons/calendar.png', context,
-                const DentistPage()), // Replace with the correct page
+                DentistBookingApprvPage(
+                    dentistId: dentistId)), // Replace with the correct page
             _buildNavImage('assets/icons/chat.png', context,
                 const DentistPage()), // Replace with the correct page
             _buildNavImage(

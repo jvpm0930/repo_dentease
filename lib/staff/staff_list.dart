@@ -16,12 +16,40 @@ class StaffListPage extends StatefulWidget {
 class _StaffListPageState extends State<StaffListPage> {
   final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> staffs = [];
+  String? staffId;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _fetchStaffId();
     _fetchStaff();
+  }
+
+  Future<void> _fetchStaffId() async {
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null || user.email == null) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      final response = await supabase
+          .from('staffs')
+          .select('staff_id')
+          .eq('email', user.email!)
+          .maybeSingle();
+
+      if (response != null && response['staff_id'] != null) {
+        setState(() {
+          staffId = response['staff_id'].toString();
+        });
+      }
+    } catch (e) {
+      print("Error fetching staff ID: $e");
+    }
   }
 
   Future<void> _fetchStaff() async {
@@ -96,7 +124,8 @@ class _StaffListPageState extends State<StaffListPage> {
                 ],
               ),
             ),
-            const StaffFooter(),
+            if (staffId != null)
+              StaffFooter(clinicId: widget.clinicId, staffId: staffId!),
           ],
         ),
       ),

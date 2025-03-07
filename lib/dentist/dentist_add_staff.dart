@@ -3,16 +3,16 @@ import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AddStaff extends StatefulWidget {
+class DentAddStaff extends StatefulWidget {
   final String clinicId;
 
-  const AddStaff({super.key, required this.clinicId});
+  const DentAddStaff({super.key, required this.clinicId});
 
   @override
-  _AddStaffState createState() => _AddStaffState();
+  _DentAddStaffState createState() => _DentAddStaffState();
 }
 
-class _AddStaffState extends State<AddStaff> {
+class _DentAddStaffState extends State<DentAddStaff> {
   final supabase = Supabase.instance.client;
 
   final firstnameController = TextEditingController();

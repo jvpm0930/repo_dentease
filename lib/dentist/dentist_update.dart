@@ -19,7 +19,7 @@ class _DentistEditPageState extends State<DentistEditPage> {
   final TextEditingController lastnameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-  String selectedRole = 'user';
+  String selectedRole = 'dentist';
 
   bool isLoading = true;
 

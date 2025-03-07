@@ -1,4 +1,5 @@
 import 'package:dentease/dentist/dentist_clinic_details.dart'; // Import new page
+import 'package:dentease/dentist/dentist_clinic_services.dart';
 import 'package:dentease/dentist/dentist_list.dart';
 import 'package:dentease/dentist/dentist_staff_list.dart';
 import 'package:dentease/widgets/background_cont.dart';
@@ -129,7 +130,7 @@ class _DentistPageState extends State<DentistPage> {
                       },
                     ),
                     _buildCustomButton(
-                      title: "All Dentists",
+                      title: "Clinic Dentists",
                       onTap: () {
                         Navigator.push(
                           context,
@@ -141,13 +142,25 @@ class _DentistPageState extends State<DentistPage> {
                       },
                     ),
                     _buildCustomButton(
-                      title: "All Staff",
+                      title: "Clinic Staffs",
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
                                 DentStaffListPage(clinicId: clinicId!),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildCustomButton(
+                      title: "Clinic Services",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DentistServListPage(clinicId: clinicId!),
                           ),
                         );
                       },

@@ -19,7 +19,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final supabase = Supabase.instance.client;
 
-  /// **🔹 Check if Email Already Exists**
+  /// ** Check if Email Already Exists**
   Future<bool> _checkIfEmailExists(String email) async {
     final response = await supabase
         .from('patients')
@@ -30,7 +30,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return response != null; // If response is not null, email exists
   }
 
-  /// **🔹 Check if Firstname & Lastname Already Exist**
+  /// ** Check if Firstname & Lastname Already Exist**
   Future<bool> _checkIfNameExists(String firstname, String lastname) async {
     final response = await supabase
         .from('patients')
@@ -42,7 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return response != null; // If response is not null, name exists
   }
 
-  /// **🔹 Sign-Up Function with Duplicate Checks**
+  /// ** Sign-Up Function with Duplicate Checks**
   Future<void> signUp() async {
     try {
       final firstname = firstnameController.text.trim();
@@ -50,7 +50,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
 
-      // 🔹 **Check for Empty Fields**
+      //  **Check for Empty Fields**
       if (firstname.isEmpty ||
           lastname.isEmpty ||
           email.isEmpty ||
@@ -59,19 +59,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return;
       }
 
-      // 🔹 **Check if Email Exists**
+      //  **Check if Email Exists**
       if (await _checkIfEmailExists(email)) {
         _showSnackbar('Email already exists. Please use another email.');
         return;
       }
 
-      // 🔹 **Check if First & Last Name Exists**
+      //  **Check if First & Last Name Exists**
       if (await _checkIfNameExists(firstname, lastname)) {
         _showSnackbar('Name already taken. Please use a different name.');
         return;
       }
 
-      // 🔹 **Create User in Supabase Auth**
+      //  **Create User in Supabase Auth**
       final authResponse = await supabase.auth.signUp(
         email: email,
         password: password,
@@ -80,7 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final userId = authResponse.user?.id;
       if (userId == null) throw 'User creation failed';
 
-      // 🔹 **Store Additional User Info in Profiles Table**
+      //  **Store Additional User Info in Profiles Table**
       await supabase.from('patients').insert({
         'patient_id': userId,
         'firstname': firstname,
@@ -89,7 +89,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'role': selectedRole, // Store selected role
       });
 
-      // ✅ **Success Message & Navigate to Login**
+      //  **Success Message & Navigate to Login**
       _showSnackbar('Signup successful! Please login.');
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => LoginScreen()));
@@ -98,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  /// **🔹 Snackbar Message Helper**
+  /// ** Snackbar Message Helper**
   void _showSnackbar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));

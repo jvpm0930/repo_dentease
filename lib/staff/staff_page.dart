@@ -1,9 +1,8 @@
 import 'package:dentease/staff/staff_clinic_details.dart';
-import 'package:dentease/staff/staff_clinic_sched.dart';
 import 'package:dentease/staff/staff_clinic_services.dart';
 import 'package:dentease/staff/staff_dentist_list.dart';
 import 'package:dentease/staff/staff_list.dart';
-import 'package:dentease/staff/staff_sched.dart';
+import 'package:dentease/staff/staff_clinics_sched.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
 import 'package:dentease/widgets/staffWidgets/staff_header.dart';
@@ -176,7 +175,7 @@ class _StaffPageState extends State<StaffPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                StaffSchedulePage(
+                                StaffClinicSchedPage(
                               clinicId: widget.clinicId,
                               staffId: widget.staffId,
                             ),

@@ -1,4 +1,5 @@
 import 'package:dentease/dentist/dentist_clinic_details.dart'; // Import new page
+import 'package:dentease/dentist/dentist_clinic_sched.dart';
 import 'package:dentease/dentist/dentist_clinic_services.dart';
 import 'package:dentease/dentist/dentist_list.dart';
 import 'package:dentease/dentist/dentist_staff_list.dart';
@@ -9,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DentistPage extends StatefulWidget {
-  const DentistPage({super.key});
+  final String clinicId;
+  final String dentistId;
+  const DentistPage({super.key, required this.clinicId, required this.dentistId});
 
   @override
   _DentistPageState createState() => _DentistPageState();
@@ -165,10 +168,24 @@ class _DentistPageState extends State<DentistPage> {
                         );
                       },
                     ),
+                    _buildCustomButton(
+                      title: "Clinic Schedules",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DentistClinicSchedPage(
+                              clinicId: widget.clinicId,
+                              dentistId: widget.dentistId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
-            if (dentistId != null) DentistFooter(dentistId: dentistId!),
+            if (dentistId != null) DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
           ],
         ),
       ),

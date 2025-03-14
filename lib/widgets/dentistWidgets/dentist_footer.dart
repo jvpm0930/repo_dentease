@@ -1,12 +1,45 @@
 import 'package:dentease/dentist/dentist_bookings_apprv.dart';
 import 'package:dentease/dentist/dentist_details.dart';
 import 'package:dentease/dentist/dentist_page.dart';
+import 'package:dentease/models/clinic_patientchat_list.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DentistFooter extends StatelessWidget {
-  final String dentistId; // Ensure a valid dentistId is passed
+class DentistFooter extends StatefulWidget {
+  final String dentistId;
+  final String clinicId;
 
-  const DentistFooter({super.key, required this.dentistId});
+  const DentistFooter(
+      {super.key, required this.dentistId, required this.clinicId});
+
+  @override
+  _DentistFooterState createState() => _DentistFooterState();
+}
+
+class _DentistFooterState extends State<DentistFooter> {
+  final supabase = Supabase.instance.client;
+  String? patientId;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPatientId();
+  }
+
+  /// Fetch patientId from bookings where clinicId matches
+  Future<void> fetchPatientId() async {
+    final response = await supabase
+        .from('bookings')
+        .select('patient_id')
+        .eq('clinic_id', widget.clinicId)
+        .maybeSingle(); // Fetch a single patient (modify as needed)
+
+    if (response != null && response['patient_id'] != null) {
+      setState(() {
+        patientId = response['patient_id'];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +65,16 @@ class DentistFooter extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildNavImage(
-                'assets/icons/home.png', context, const DentistPage()),
+                'assets/icons/home.png',
+                context,
+                DentistPage(
+                    clinicId: widget.clinicId, dentistId: widget.dentistId)),
             _buildNavImage('assets/icons/calendar.png', context,
-                DentistBookingApprvPage(
-                    dentistId: dentistId)), // Replace with the correct page
-            _buildNavImage('assets/icons/chat.png', context,
-                const DentistPage()), // Replace with the correct page
+                DentistBookingApprvPage(dentistId: widget.dentistId)),
             _buildNavImage(
-              'assets/icons/profile.png',
-              context,
-              DentistDetailsPage(dentistId: dentistId),
-            ),
+                'assets/icons/chat.png', context, ClinicPatientChatList(clinicId: widget.clinicId)),
+            _buildNavImage('assets/icons/profile.png', context,
+                DentistDetailsPage(dentistId: widget.dentistId)),
           ],
         ),
       ),
@@ -50,7 +82,7 @@ class DentistFooter extends StatelessWidget {
   }
 
   /// Builds a navigation button with an image
-  Widget _buildNavImage(String imagePath, BuildContext context, Widget page) {
+  Widget _buildNavImage(String imagePath, BuildContext context, Widget? page) {
     return IconButton(
       icon: Image.asset(
         imagePath,
@@ -58,12 +90,15 @@ class DentistFooter extends StatelessWidget {
         height: 30,
         color: Colors.white,
       ),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => page),
-        );
-      },
+      onPressed: page != null
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => page),
+              );
+            }
+          : null, // Disable button if page is null
     );
   }
+
 }

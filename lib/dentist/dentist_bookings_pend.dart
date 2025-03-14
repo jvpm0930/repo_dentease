@@ -1,4 +1,4 @@
-import 'package:dentease/staff/staff_bookings_apprv.dart';
+import 'package:dentease/dentist/dentist_bookings_apprv.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,15 +9,15 @@ String formatDateTime(String dateTime) {
   return DateFormat('MMM d, y • h:mma').format(parsedDate).toLowerCase();
 }
 
-class StaffBookingPendPage extends StatefulWidget {
-  final String staffId;
-  const StaffBookingPendPage({super.key, required this.staffId});
+class DentistBookingPendPage extends StatefulWidget {
+  final String dentistId;
+  const DentistBookingPendPage({super.key, required this.dentistId});
 
   @override
-  _StaffBookingPendPageState createState() => _StaffBookingPendPageState();
+  _DentistBookingPendPageState createState() => _DentistBookingPendPageState();
 }
 
-class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
+class _DentistBookingPendPageState extends State<DentistBookingPendPage> {
   final supabase = Supabase.instance.client;
   late Future<List<Map<String, dynamic>>> _bookingsFuture;
 
@@ -58,9 +58,9 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.transparent, // Transparent AppBar
+        elevation: 0, // Remove shadow
+        iconTheme: const IconThemeData(color: Colors.white), // White icons
       ),
       body: Column(
         children: [
@@ -76,8 +76,8 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => StaffBookingApprvPage(
-                              staffId: widget.staffId),
+                          builder: (context) => DentistBookingApprvPage(
+                              dentistId: widget.dentistId),
                         ),
                       );
                     },
@@ -171,8 +171,7 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                                         booking['booking_id'].toString(),
                                         booking['status']);
                                   },
-                                  child: const Text("Update",
-                                    style: TextStyle(color: Colors.blue),
+                                  child: const Text("Update", style: TextStyle(color: Colors.blue),
                                   ),
                                 ),
                               ],

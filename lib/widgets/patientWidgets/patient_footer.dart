@@ -1,8 +1,12 @@
+import 'package:dentease/models/patient_clinicchat_list.dart';
+import 'package:dentease/patients/patient_booking_apprv.dart';
 import 'package:dentease/patients/patient_pagev2.dart';
+import 'package:dentease/patients/patient_profile.dart';
 import 'package:flutter/material.dart';
 
 class PatientFooter extends StatelessWidget {
-  const PatientFooter({super.key});
+  final patientId;
+  const PatientFooter({super.key, required this.patientId});
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +33,13 @@ class PatientFooter extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildNavImage(
-                    'assets/icons/home.png', context, PatientPage()),
-                _buildNavImage('assets/icons/calendar.png', context, PatientPage()),
+                _buildNavImage('assets/icons/home.png', context, PatientPage()),
+                _buildNavImage('assets/icons/calendar.png', context,
+                    PatientBookingApprv(patientId: patientId)),
                 _buildNavImage('assets/icons/scan.png', context, PatientPage()),
-                _buildNavImage('assets/icons/chat.png', context, PatientPage()),
+                _buildNavImage('assets/icons/chat.png', context, PatientClinicChatList(patientId: patientId)),
                 _buildNavImage(
-                    'assets/icons/profile.png', context, PatientPage()),
+                    'assets/icons/profile.png', context, PatientProfile(patientId: patientId)),
               ],
             ),
           ),
@@ -44,7 +48,7 @@ class PatientFooter extends StatelessWidget {
     );
   }
 
-   /// Builds a navigation item using a custom image icon
+  /// Builds a navigation item using a custom image icon
   Widget _buildNavImage(String imagePath, BuildContext context, Widget page) {
     return IconButton(
       icon: Image.asset(

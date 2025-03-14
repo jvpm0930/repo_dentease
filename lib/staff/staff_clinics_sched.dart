@@ -1,18 +1,19 @@
+import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class StaffSchedulePage extends StatefulWidget {
+class StaffClinicSchedPage extends StatefulWidget {
   final String staffId;
   final String clinicId;
 
-  const StaffSchedulePage(
+  const StaffClinicSchedPage(
       {super.key, required this.staffId, required this.clinicId});
 
   @override
-  _StaffSchedulePageState createState() => _StaffSchedulePageState();
+  _StaffClinicSchedPageState createState() => _StaffClinicSchedPageState();
 }
 
-class _StaffSchedulePageState extends State<StaffSchedulePage> {
+class _StaffClinicSchedPageState extends State<StaffClinicSchedPage> {
   final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> schedules = [];
   DateTime selectedDate = DateTime.now();
@@ -111,8 +112,15 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Manage Schedule")),
+    return BackgroundCont(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: const Text("Manage Schedule",
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -120,9 +128,10 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
             // Date Picker
             ListTile(
               title: Text(
-                  "Selected Date: ${selectedDate.toLocal()}".split(' ')[0]),
+                  "Selected Date: ${selectedDate.toLocal()}".split(' ')[0],
+                    style: const TextStyle(color: Colors.white)),
               trailing: IconButton(
-                icon: const Icon(Icons.calendar_today),
+                icon: const Icon(Icons.calendar_today, color: Colors.white),
                 onPressed: () async {
                   DateTime? picked = await showDatePicker(
                     context: context,
@@ -143,7 +152,8 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Start Time"),
+                      const Text("Start Time",
+                          style: TextStyle(color: Colors.white)),
                       DropdownButton<int>(
                         value: startHour,
                         isExpanded: true,
@@ -162,7 +172,8 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("End Time"),
+                      const Text("End Time",
+                          style: TextStyle(color: Colors.white)),
                       DropdownButton<int>(
                         value: endHour,
                         isExpanded: true,
@@ -178,14 +189,14 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
               ],
             ),
 
-
             const SizedBox(height: 20),
 
             isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _addSchedule,
-                    child: const Text("Save Schedule"),
+                    child: const Text("Save Schedule",
+                        style: TextStyle(color: Colors.blue)),
                   ),
 
             const SizedBox(height: 20),
@@ -197,10 +208,13 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
                 itemBuilder: (context, index) {
                   final schedule = schedules[index];
                   return Card(
+                    color: Colors.white,
                     child: ListTile(
-                      title: Text("Date: ${schedule['date'].split('T')[0]}"),
+                      title: Text("Date: ${schedule['date'].split('T')[0]}",
+                          style: const TextStyle(color: Colors.black)),
                       subtitle: Text(
-                          "Time: ${schedule['start_time']}:00 - ${schedule['end_time']}:00"),
+                          "Time: ${schedule['start_time']}:00 - ${schedule['end_time']}:00",
+                          style: const TextStyle(color: Colors.black)),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () => _deleteSchedule(schedule['sched_id']),
@@ -213,6 +227,7 @@ class _StaffSchedulePageState extends State<StaffSchedulePage> {
           ],
         ),
       ),
+    )
     );
   }
 }

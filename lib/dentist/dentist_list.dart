@@ -124,7 +124,7 @@ class _DentistListPageState extends State<DentistListPage> {
                 ],
               ),
             ),
-            if (dentistId != null) DentistFooter(dentistId: dentistId!),
+            if (dentistId != null) DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
           ],
         ),
       ),

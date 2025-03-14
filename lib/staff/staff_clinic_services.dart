@@ -1,6 +1,7 @@
-import 'package:dentease/staff/staff_add_service.dart';
+import 'package:dentease/dentist/dentist_add_service.dart';
+import 'package:dentease/dentist/dentist_service_details.dart';
+import 'package:dentease/widgets/dentistWidgets/dentist_header.dart';
 import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
-import 'package:dentease/widgets/staffWidgets/staff_header.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dentease/widgets/background_cont.dart';
@@ -27,7 +28,7 @@ class _StaffServListPageState extends State<StaffServListPage> {
     _fetchServices();
   }
 
-  /// 🔹 Fetch `staff_id` for the logged-in user
+
   Future<void> _fetchStaffId() async {
     try {
       final user = supabase.auth.currentUser;
@@ -56,7 +57,7 @@ class _StaffServListPageState extends State<StaffServListPage> {
     try {
       final response = await supabase
           .from('services')
-          .select('service_name, service_price')
+          .select('service_id, service_name, service_price, status')
           .eq('clinic_id', widget.clinicId);
 
       setState(() {
@@ -64,6 +65,7 @@ class _StaffServListPageState extends State<StaffServListPage> {
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching services: $e')),
       );
@@ -73,6 +75,18 @@ class _StaffServListPageState extends State<StaffServListPage> {
     }
   }
 
+  Future<void> _deleteService(String id) async {
+    await supabase.from('services').delete().eq('service_id', id);
+
+    setState(() {
+      services.removeWhere((service) => service['service_id'] == id);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Service deleted successfully!')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackgroundCont(
@@ -80,82 +94,91 @@ class _StaffServListPageState extends State<StaffServListPage> {
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            const StaffHeader(),
+            const DentistHeader(),
             Padding(
               padding: const EdgeInsets.only(top: 150, bottom: 50),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => StaffAddService(
-                                clinicId: widget.clinicId,
-                              ),
+                              builder: (context) =>
+                                  DentistAddService(clinicId: widget.clinicId),
                             ),
                           );
+                          _fetchServices();
                         },
-                        child: const Text("Add New Services"),
+                        child: const Text(
+                          "Add New Services",
+                          style: TextStyle(color: Colors.blue),
+                        ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StaffAddService(
-                                clinicId: widget.clinicId,
-                              ),
+                    ),
+                    ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: services.length,
+                      itemBuilder: (context, index) {
+                        final service = services[index];
+                        return Card(
+                          margin: const EdgeInsets.all(10),
+                          child: ListTile(
+                            title: Text(
+                              "Name: ${service['service_name'] ?? 'N/A'}"
+                                  .trim(),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          );
-                        },
-                        child: const Text("Clinic Schedules"),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : services.isEmpty
-                            ? const Center(child: Text("No services found."))
-                            : ListView.builder(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                itemCount: services.length,
-                                itemBuilder: (context, index) {
-                                  final service = services[index];
-                                  return Card(
-                                    margin: const EdgeInsets.all(10),
-                                    child: ListTile(
-                                      title: Text(
-                                        "Name: ${service['service_name'] ?? 'N/A'}"
-                                            .trim(),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                              "Price: ${service['service_price'] ?? 'N/A'} php"),
-                                        ],
-                                      ),
-                                      leading: const Icon(Icons.medical_services),
-                                    ),
-                                  );
-                                },
-                              ),
-                  ),
-                ],
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    "Price: ${service['service_price'] ?? 'N/A'} php"),
+                                Text(
+                                  "Status: ${service['status']}",
+                                  style: TextStyle(
+                                    color: service['status'] == 'pending'
+                                        ? Colors.red
+                                        : Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            leading: const Icon(Icons.medical_services),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () =>
+                                  _deleteService(service['service_id']),
+                            ),
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DentistServiceDetailsPage(
+                                    serviceId: service['service_id'].toString(),
+                                  ),
+                                ),
+                              );
+                              _fetchServices();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-            if (staffId != null)
-              StaffFooter(clinicId: widget.clinicId, staffId: staffId!),
+            if (staffId != null) StaffFooter(clinicId: widget.clinicId, staffId: staffId!),
           ],
         ),
       ),

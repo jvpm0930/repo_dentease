@@ -89,12 +89,14 @@ class _LoginScreenState extends State<LoginScreen> {
       // Check role in `dentists` table
       final dentistResponse = await supabase
           .from('dentists')
-          .select('role, email')
+          .select('role, email, clinic_id, dentist_id')
           .eq('dentist_id', userId)
           .maybeSingle();
 
       if (dentistResponse != null) {
         userEmail = dentistResponse['email'];
+        String clinicId = dentistResponse['clinic_id']; // Get clinic_id
+        String dentistId = dentistResponse['dentist_id']; // Get staff_id
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Logged in as $userEmail')),
@@ -103,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => DentistPage(),
+            builder: (_) => DentistPage(clinicId: clinicId, dentistId: dentistId),
           ),
         );
         return;

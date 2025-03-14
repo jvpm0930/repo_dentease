@@ -1,4 +1,5 @@
-import 'package:dentease/staff/staff_bookings_pend.dart';
+import 'package:dentease/models/clinic_patientchat_list.dart';
+import 'package:dentease/staff/staff_bookings_apprv.dart';
 import 'package:dentease/staff/staff_details.dart';
 import 'package:dentease/staff/staff_page.dart';
 import 'package:flutter/material.dart';
@@ -35,9 +36,8 @@ class StaffFooter extends StatelessWidget {
               children: [
                 _buildNavImage('assets/icons/home.png', context, StaffPage(clinicId: clinicId, staffId: staffId)),
                 _buildNavImage(
-                    'assets/icons/calendar.png', context,  StaffBookingRequestsPage(
-                        clinicId: clinicId, staffId: staffId)),
-                _buildNavImage('assets/icons/chat.png', context,  StaffDetailsPage(staffId: staffId)),
+                    'assets/icons/calendar.png', context,  StaffBookingApprvPage(staffId: staffId)),
+                _buildNavImage('assets/icons/chat.png', context,  ClinicPatientChatList(clinicId: clinicId)),
                 _buildNavImage(
                     'assets/icons/profile.png', context,  StaffDetailsPage(staffId: staffId)),
               ],

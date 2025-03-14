@@ -74,6 +74,18 @@ class _DentistServListPageState extends State<DentistServListPage> {
     }
   }
 
+  Future<void> _deleteService(String id) async {
+    await supabase.from('services').delete().eq('service_id', id);
+
+    setState(() {
+      services.removeWhere((service) => service['service_id'] == id);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Service deleted successfully!')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackgroundCont(
@@ -101,7 +113,11 @@ class _DentistServListPageState extends State<DentistServListPage> {
                           );
                           _fetchServices();
                         },
-                        child: const Text("Add New Services"),
+                        child: const Text(
+                          "Add New Services",
+                          style: TextStyle(
+                              color: Colors.blue),
+                        ),
                       ),
                     ),
                     ListView.builder(
@@ -137,6 +153,11 @@ class _DentistServListPageState extends State<DentistServListPage> {
                               ],
                             ),
                             leading: const Icon(Icons.medical_services),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () =>
+                                  _deleteService(service['service_id']),
+                            ),
                             onTap: () async {
                               await Navigator.push(
                                 context,
@@ -157,7 +178,7 @@ class _DentistServListPageState extends State<DentistServListPage> {
                 ),
               ),
             ),
-            if (dentistId != null) DentistFooter(dentistId: dentistId!),
+            if (dentistId != null) DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
           ],
         ),
       ),

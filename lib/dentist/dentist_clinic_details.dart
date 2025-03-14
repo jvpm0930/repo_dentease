@@ -172,7 +172,7 @@ class _DentClinicPageState extends State<DentClinicPage> {
             ),
 
             // Dentist Footer (only if `dentistId` is fetched)
-            if (dentistId != null) DentistFooter(dentistId: dentistId!),
+            if (dentistId != null) DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
           ],
         ),
       ),

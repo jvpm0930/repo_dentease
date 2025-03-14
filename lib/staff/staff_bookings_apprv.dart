@@ -1,4 +1,4 @@
-import 'package:dentease/staff/staff_bookings_apprv.dart';
+import 'package:dentease/staff/staff_bookings_pend.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,15 +9,16 @@ String formatDateTime(String dateTime) {
   return DateFormat('MMM d, y • h:mma').format(parsedDate).toLowerCase();
 }
 
-class StaffBookingPendPage extends StatefulWidget {
+class StaffBookingApprvPage extends StatefulWidget {
   final String staffId;
-  const StaffBookingPendPage({super.key, required this.staffId});
+  const StaffBookingApprvPage({super.key, required this.staffId});
 
   @override
-  _StaffBookingPendPageState createState() => _StaffBookingPendPageState();
+  _StaffBookingApprvPageState createState() =>
+      _StaffBookingApprvPageState();
 }
 
-class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
+class _StaffBookingApprvPageState extends State<StaffBookingApprvPage> {
   final supabase = Supabase.instance.client;
   late Future<List<Map<String, dynamic>>> _bookingsFuture;
 
@@ -32,7 +33,7 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
         .from('bookings')
         .select(
             'booking_id, patient_id, service_id, clinic_id, date, status, patients(firstname), services(service_name)')
-        .eq('status', 'pending');
+        .eq('status', 'approved');
     return response;
   }
 
@@ -54,7 +55,7 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
           backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text(
-          "Pending Booking Request",
+          "Approved Booking Request",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
@@ -72,18 +73,11 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StaffBookingApprvPage(
-                              staffId: widget.staffId),
-                        ),
-                      );
-                    },
+                    onPressed:
+                        null, // 🔹 Disable the "Approved" button in this page
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // Active color
-                      foregroundColor: Colors.white, // Active text color
+                      backgroundColor: Colors.grey[300], // Disabled background
+                      foregroundColor: Colors.grey[600], // Disabled text color
                     ),
                     child: const Text("Approved"),
                   ),
@@ -91,11 +85,18 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed:
-                        null, // 🔹 Disable the "Approved" button in this page
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StaffBookingPendPage(
+                              staffId: widget.staffId),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300], // Disabled background
-                      foregroundColor: Colors.grey[600], // Disabled text color
+                      backgroundColor: Colors.blue, // Active color
+                      foregroundColor: Colors.white, // Active text color
                     ),
                     child: const Text("Pending"),
                   ),
@@ -113,7 +114,7 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No pending bookings"));
+                  return const Center(child: Text("No approved bookings"));
                 }
 
                 final bookings = snapshot.data!;

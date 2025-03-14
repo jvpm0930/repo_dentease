@@ -16,7 +16,7 @@ class _PatientPageState extends State<PatientPage> {
   final supabase = Supabase.instance.client;
   String? userEmail;
   String? clinicId;
-  String? dentistId;
+  String? patientId;
   bool isLoading = true;
 
   @override
@@ -47,7 +47,7 @@ class _PatientPageState extends State<PatientPage> {
       if (response != null) {
         setState(() {
           clinicId = response['clinic_id']?.toString();
-          dentistId = response['patient_id']?.toString();
+          patientId = response['patient_id']?.toString();
         });
       }
     } catch (error) {
@@ -70,7 +70,8 @@ class _PatientPageState extends State<PatientPage> {
             const PatientHeader(),
             const SizedBox(height: 30),
             Center(child: const ClinicCarousel()), // Centering the carousel
-            const PatientFooter(),
+            if (patientId != null)
+              PatientFooter(patientId: patientId!),
           ],
         ),
       ),

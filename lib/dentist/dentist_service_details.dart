@@ -71,7 +71,7 @@ class _DentistServiceDetailsPageState extends State<DentistServiceDetailsPage> {
         const SnackBar(content: Text('Service updated successfully!')),
       );
 
-      Navigator.pop(context, true); // ✅ Go back after update
+      Navigator.pop(context, true); // Go back after update
     } catch (e) {
       setState(() {
         errorMessage = 'Error updating service: $e';

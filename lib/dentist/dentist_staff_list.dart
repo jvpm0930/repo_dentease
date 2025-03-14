@@ -100,7 +100,10 @@ class _DentStaffListPageState extends State<DentStaffListPage> {
                           ),
                         );
                       },
-                      child: const Text("Add New Staff"),
+                      child: const Text(
+                        "Add New Staff",
+                        style: TextStyle(color: Colors.blue),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -142,7 +145,7 @@ class _DentStaffListPageState extends State<DentStaffListPage> {
                 ],
               ),
             ),
-            if (dentistId != null) DentistFooter(dentistId: dentistId!),
+            if (dentistId != null) DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
           ],
         ),
       ),

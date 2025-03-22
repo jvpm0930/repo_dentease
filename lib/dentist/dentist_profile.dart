@@ -1,21 +1,22 @@
-import 'package:dentease/dentist/dentist_update.dart';
+import 'package:dentease/dentist/dentist_profile_update.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DentistDetailsPage extends StatefulWidget {
+class DentistProfile extends StatefulWidget {
   final String dentistId;
 
-  const DentistDetailsPage({super.key, required this.dentistId});
+  const DentistProfile({super.key, required this.dentistId});
 
   @override
-  State<DentistDetailsPage> createState() => _DentistDetailsPageState();
+  State<DentistProfile> createState() => _DentistProfileState();
 }
 
-class _DentistDetailsPageState extends State<DentistDetailsPage> {
+class _DentistProfileState extends State<DentistProfile> {
   final supabase = Supabase.instance.client;
   Map<String, dynamic>? dentistDetails;
   bool isLoading = true;
+  String? profileUrl;
 
   @override
   void initState() {
@@ -27,12 +28,21 @@ class _DentistDetailsPageState extends State<DentistDetailsPage> {
     try {
       final response = await supabase
           .from('dentists')
-          .select('firstname, lastname, email, phone, role')
+          .select('firstname, lastname, phone, role, profile_url')
           .eq('dentist_id', widget.dentistId)
           .single();
 
       setState(() {
         dentistDetails = response;
+
+        // Add cache-busting timestamp to profile URL
+        final url = response['profile_url'];
+        if (url != null && url.isNotEmpty) {
+          profileUrl =
+              '$url?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+        } else {
+          profileUrl = null;
+        }
         isLoading = false;
       });
     } catch (e) {
@@ -43,6 +53,19 @@ class _DentistDetailsPageState extends State<DentistDetailsPage> {
         isLoading = false;
       });
     }
+  }
+
+  Widget _buildProfilePicture() {
+    return CircleAvatar(
+      radius: 50,
+      backgroundColor: Colors.grey[300],
+      backgroundImage: profileUrl != null && profileUrl!.isNotEmpty
+          ? NetworkImage(profileUrl!)
+          : const AssetImage('assets/default_profile.png') as ImageProvider,
+      child: profileUrl == null || profileUrl!.isEmpty
+          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+          : null,
+    );
   }
 
   Widget _buildTextField(String hint) {
@@ -66,28 +89,30 @@ class _DentistDetailsPageState extends State<DentistDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return BackgroundCont(
-        child: Scaffold(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-        title: const Text(
-          "My Profile",
-          style: TextStyle(color: Colors.white),
+          title: const Text(
+            "My Profile",
+            style: TextStyle(color: Colors.white),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent, // Transparent AppBar
-        elevation: 0, // Remove shadow
-        iconTheme: const IconThemeData(color: Colors.white), // White icons
-      ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    _buildTextField(dentistDetails?['firstname'] ?? 'Firstname'),
+                    // Profile Picture
+                    _buildProfilePicture(),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                        dentistDetails?['firstname'] ?? 'Firstname'),
                     _buildTextField(dentistDetails?['lastname'] ?? 'Lastname'),
-                    _buildTextField(dentistDetails?['email'] ?? 'Email'),
                     _buildTextField(dentistDetails?['phone'] ?? 'Phone'),
                     _buildTextField(dentistDetails?['role'] ?? 'Role'),
 
@@ -100,27 +125,32 @@ class _DentistDetailsPageState extends State<DentistDetailsPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                DentistEditPage(dentistId: widget.dentistId),
+                                DentistProfUpdate(dentistId: widget.dentistId),
                           ),
                         );
 
+                        // If details were updated, refresh profile and update cache
                         if (updated == true) {
                           _fetchDentistDetails(); // Refresh after update
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.indigo,
+                        backgroundColor: Colors.blue, // Button color
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        minimumSize: const Size(double.infinity, 50),
                       ),
-                      child: const Text('Edit Details'),
+                      child: const Text(
+                        'Edit Details',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
               ),
-      ));
+      ),
+    );
   }
 }

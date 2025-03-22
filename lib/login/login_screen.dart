@@ -1,9 +1,10 @@
 import 'package:dentease/admin/pages/clinics/admin_dentease_first.dart';
-import 'package:dentease/clinic/ownerSignup/dental_apply_frst.dart';
+import 'package:dentease/clinic/ownerSignup/dental_clinic_signup.dart';
 import 'package:dentease/staff/staff_page.dart';
 import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../dentist/dentist_page.dart';
 import '../patients/patient_pagev2.dart';
 import 'signup_screen.dart';
@@ -19,7 +20,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final supabase = Supabase.instance.client;
+  bool rememberMe = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email') ?? '';
+    final savedPassword = prefs.getString('saved_password') ?? '';
+    final savedRememberMe = prefs.getBool('remember_me') ?? false;
+
+    if (savedRememberMe) {
+      setState(() {
+        emailController.text = savedEmail;
+        passwordController.text = savedPassword;
+        rememberMe = true;
+      });
+    }
+  }
+
+  /// Save credentials if "Remember Me" is checked
+  Future<void> _saveCredentials(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (rememberMe) {
+      await prefs.setString('saved_email', email);
+      await prefs.setString('saved_password', password);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+      await prefs.setBool('remember_me', false);
+    }
+  }
+
+  /// Login Function
   Future<void> login() async {
     try {
       final email = emailController.text.trim();
@@ -33,6 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final userId = response.user?.id;
       if (userId == null) throw 'Login failed';
+
+      // Save credentials if Remember Me is checked
+      await _saveCredentials(email, password);
 
       String? userEmail;
 
@@ -48,16 +89,13 @@ class _LoginScreenState extends State<LoginScreen> {
         userEmail = profileResponse['email'];
 
         if (role == 'admin') {
-          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Logged in as $userEmail')),
           );
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) => AdminPage(),
-            ),
+            MaterialPageRoute(builder: (_) => AdminPage()),
           );
           return;
         }
@@ -79,9 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => PatientPage(),
-          ),
+          MaterialPageRoute(builder: (_) => PatientPage()),
         );
         return;
       }
@@ -105,7 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => DentistPage(clinicId: clinicId, dentistId: dentistId),
+            builder: (_) =>
+                DentistPage(clinicId: clinicId, dentistId: dentistId),
           ),
         );
         return;
@@ -130,15 +167,12 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                StaffPage(clinicId: clinicId, staffId: staffId), // Pass staffId
+            builder: (_) => StaffPage(clinicId: clinicId, staffId: staffId),
           ),
         );
         return;
       }
 
-
-      // If no role found
       throw 'User role not found in any table';
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +180,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,17 +193,14 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 30),
-                Image.asset('assets/logo2.png', width: 500), // App Logo
+                Image.asset('assets/logo2.png', width: 500),
                 const SizedBox(height: 40),
                 TextField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: 'Email',
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.mail, color: Colors.indigo[900]),
-                    ),
+                    prefixIcon: Icon(Icons.mail, color: Colors.indigo[900]),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -178,14 +208,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: passwordController,
                   decoration: InputDecoration(
                     hintText: 'Password',
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.lock, color: Colors.indigo[900]),
-                    ),
+                    prefixIcon: Icon(Icons.lock, color: Colors.indigo[900]),
                   ),
                   obscureText: true,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: rememberMe,
+                      onChanged: (value) {
+                        setState(() {
+                          rememberMe = value ?? false;
+                        });
+                      },
+                    ),
+                    const Text('Remember Me',
+                        style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: login,
                   style: ElevatedButton.styleFrom(
@@ -200,10 +242,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text(
                     'Login',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo[900],
-                    ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.indigo[900]),
                   ),
                 ),
                 TextButton(
@@ -211,14 +252,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     context,
                     MaterialPageRoute(builder: (_) => SignUpScreen()),
                   ),
-                  child: const Text(
-                    'Don\'t have an Account? Sign up',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: const Text('Don\'t have an Account? Sign up',
+                      style: TextStyle(color: Colors.white)),
                 ),
-                const SizedBox(height: 40),
+                 const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: () => Navigator.push(
                     context,

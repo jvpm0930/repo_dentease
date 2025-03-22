@@ -14,6 +14,7 @@ class DentalApplyFirst extends StatefulWidget {
 class _DentalApplyFirstState extends State<DentalApplyFirst> {
   final clinicnameController = TextEditingController();
   final emailController = TextEditingController();
+  final phoneController = TextEditingController();
 
   final supabase = Supabase.instance.client;
 
@@ -33,9 +34,10 @@ class _DentalApplyFirstState extends State<DentalApplyFirst> {
     try {
       final clinicname = clinicnameController.text.trim();
       final email = emailController.text.trim();
+      final phone = phoneController.text.trim();
 
       // 🔹 **Check for Empty Fields**
-      if (clinicname.isEmpty || email.isEmpty) {
+      if (clinicname.isEmpty || email.isEmpty || phone.isEmpty) {
         _showSnackbar('Please fill in all fields.');
         return;
       }
@@ -52,6 +54,7 @@ class _DentalApplyFirstState extends State<DentalApplyFirst> {
           .insert({
             'clinic_name': clinicname,
             'email': email,
+            'phone': phone,
           })
           .select('clinic_id')
           .maybeSingle();
@@ -107,8 +110,18 @@ class _DentalApplyFirstState extends State<DentalApplyFirst> {
                     _buildTextField(clinicnameController, 'Clinic Name',
                         Icons.local_hospital),
                     const SizedBox(height: 10),
-                    _buildTextField(emailController, 'Email', Icons.mail,
+                    Text(
+                      '* Recommended to not use your personal Email *',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextField(emailController, 'Clinic Email', Icons.mail,
                         keyboardType: TextInputType.emailAddress),
+                    const SizedBox(height: 10),
+                    _buildTextField(phoneController, 'Clinic Contact Number', Icons.phone),
                     const SizedBox(height: 20),
                     _buildSignUpButton(Icons.arrow_left),
                     _buildLoginTextButton(),

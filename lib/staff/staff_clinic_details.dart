@@ -1,9 +1,10 @@
+import 'package:dentease/clinic/ownerSignup/dentease_moreDetails.dart';
+import 'package:dentease/widgets/clinicWidgets/forDentStaff_clinicPage.dart';
 import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
 import 'package:dentease/widgets/staffWidgets/staff_header.dart';
 import 'package:flutter/material.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class StaffClinicPage extends StatefulWidget {
   final String clinicId;
@@ -32,21 +33,19 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
           .from('clinics')
           .select()
           .eq('clinic_id', widget.clinicId)
-          .limit(1) // Ensure at most one result
           .maybeSingle();
 
-      final dentistResponse = await supabase
+      final staffResponse = await supabase
           .from('staffs')
           .select('staff_id')
           .eq('clinic_id', widget.clinicId)
-          .limit(1) // Ensure at most one result
           .maybeSingle();
 
       if (!mounted) return; // Prevent state updates if widget is disposed
 
       setState(() {
         clinicDetails = clinicResponse;
-        staffId = dentistResponse?['staff_id'];
+        staffId = staffResponse?['staff_id'];
         isLoading = false;
       });
     } catch (e) {
@@ -101,70 +100,42 @@ class _StaffClinicPageState extends State<StaffClinicPage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const SizedBox(height: 30),
+                                ClinicFrontForDentStaff(
+                                    clinicId: widget.clinicId),
+                                const SizedBox(height: 30),
+                                const Text(
+                                    "Above is Clinics Front Card In Patients Page"),
+                                const SizedBox(height: 10),
                                 _buildDetailRow(
                                     'Status:', clinicDetails?['status']),
                                 _buildDetailRow('Clinic Name:',
                                     clinicDetails?['clinic_name']),
-                                _buildDetailRow(
-                                    'Address:', clinicDetails?['address']),
-                                if (clinicDetails?['latitude'] != null &&
-                                    clinicDetails?['longitude'] != null)
-                                  Column(
-                                    children: [
-                                      const SizedBox(height: 8),
-                                      SizedBox(
-                                        height: 150,
-                                        child: GoogleMap(
-                                          initialCameraPosition: CameraPosition(
-                                            target: LatLng(
-                                              clinicDetails?['latitude'] ??
-                                                  0.0, // Default value
-                                              clinicDetails?['longitude'] ??
-                                                  0.0,
-                                            ),
-                                            zoom: 15,
-                                          ),
-                                          markers: {
-                                            Marker(
-                                              markerId: const MarkerId(
-                                                  'clinicLocation'),
-                                              position: LatLng(
-                                                clinicDetails?['latitude'] ??
-                                                    0.0,
-                                                clinicDetails?['longitude'] ??
-                                                    0.0,
-                                              ),
-                                            ),
-                                          },
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Navigate to DentClinicMore page
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ClinicDetails(
+                                          clinicId: widget.clinicId,
                                         ),
                                       ),
-                                    ],
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.blue, // Button color
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                const SizedBox(height: 8),
-                                if (clinicDetails?['license_url'] != null)
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'License:',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
-                                          clinicDetails?['license_url'],
-                                          height: 150,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ],
+                                  child: const Text(
+                                    'More Details',
+                                    style: TextStyle(color: Colors.white),
                                   ),
+                                ),
                               ],
                             ),
                           ),

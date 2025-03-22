@@ -1,21 +1,22 @@
-import 'package:dentease/staff/staff_update.dart';
+import 'package:dentease/staff/staff_profile_update.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class StaffDetailsPage extends StatefulWidget {
+class StaffProfile extends StatefulWidget {
   final String staffId;
 
-  const StaffDetailsPage({super.key, required this.staffId});
+  const StaffProfile({super.key, required this.staffId});
 
   @override
-  State<StaffDetailsPage> createState() => _StaffDetailsPageState();
+  State<StaffProfile> createState() => _StaffProfileState();
 }
 
-class _StaffDetailsPageState extends State<StaffDetailsPage> {
+class _StaffProfileState extends State<StaffProfile> {
   final supabase = Supabase.instance.client;
   Map<String, dynamic>? staffDetails;
   bool isLoading = true;
+  String? profileUrl;
 
   @override
   void initState() {
@@ -27,12 +28,22 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
     try {
       final response = await supabase
           .from('staffs')
-          .select('firstname, lastname, email, phone, role')
+          .select('firstname, lastname, phone, role, profile_url')
           .eq('staff_id', widget.staffId)
           .single();
 
       setState(() {
         staffDetails = response;
+
+        // Add cache-busting timestamp to profile URL
+        final url = response['profile_url'];
+        if (url != null && url.isNotEmpty) {
+          profileUrl =
+              '$url?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+        } else {
+          profileUrl = null;
+        }
+
         isLoading = false;
       });
     } catch (e) {
@@ -43,6 +54,19 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
         isLoading = false;
       });
     }
+  }
+
+  Widget _buildProfilePicture() {
+    return CircleAvatar(
+      radius: 50,
+      backgroundColor: Colors.grey[300],
+      backgroundImage: profileUrl != null && profileUrl!.isNotEmpty
+          ? NetworkImage(profileUrl!)
+          : const AssetImage('assets/default_profile.png') as ImageProvider,
+      child: profileUrl == null || profileUrl!.isEmpty
+          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+          : null,
+    );
   }
 
   Widget _buildTextField(String hint) {
@@ -85,9 +109,10 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  _buildProfilePicture(),
+                  const SizedBox(height: 16),
                   _buildTextField(staffDetails?['firstname'] ?? 'Firstname'),
                   _buildTextField(staffDetails?['lastname'] ?? 'Lastname'),
-                  _buildTextField(staffDetails?['email'] ?? 'Email'),
                   _buildTextField(staffDetails?['phone'] ?? 'Phone'),
                   _buildTextField(staffDetails?['role'] ?? 'Role'),
 
@@ -100,7 +125,7 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              StaffEditPage(staffId: widget.staffId),
+                              StaffProfUpdate(staffId: widget.staffId),
                         ),
                       );
 
@@ -109,14 +134,17 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.indigo,
+                      backgroundColor: Colors.blue, // Button color
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: const Text('Edit Details'),
+                    child: const Text(
+                      'Edit Details',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),

@@ -13,6 +13,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final firstnameController = TextEditingController();
   final lastnameController = TextEditingController();
+  final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   String selectedRole = 'patient'; // Default role
@@ -30,29 +31,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return response != null; // If response is not null, email exists
   }
 
-  /// ** Check if Firstname & Lastname Already Exist**
-  Future<bool> _checkIfNameExists(String firstname, String lastname) async {
-    final response = await supabase
-        .from('patients')
-        .select('patient_id')
-        .eq('firstname', firstname)
-        .eq('lastname', lastname)
-        .maybeSingle();
-
-    return response != null; // If response is not null, name exists
-  }
-
   /// ** Sign-Up Function with Duplicate Checks**
   Future<void> signUp() async {
     try {
       final firstname = firstnameController.text.trim();
       final lastname = lastnameController.text.trim();
+      final phone = phoneController.text.trim();
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
 
       //  **Check for Empty Fields**
       if (firstname.isEmpty ||
           lastname.isEmpty ||
+          phone.isEmpty ||
           email.isEmpty ||
           password.isEmpty) {
         _showSnackbar('Please fill in all fields.');
@@ -62,12 +53,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       //  **Check if Email Exists**
       if (await _checkIfEmailExists(email)) {
         _showSnackbar('Email already exists. Please use another email.');
-        return;
-      }
-
-      //  **Check if First & Last Name Exists**
-      if (await _checkIfNameExists(firstname, lastname)) {
-        _showSnackbar('Name already taken. Please use a different name.');
         return;
       }
 
@@ -85,6 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'patient_id': userId,
         'firstname': firstname,
         'lastname': lastname,
+        'phone': phone,
         'email': email,
         'role': selectedRole, // Store selected role
       });
@@ -129,6 +115,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     SizedBox(height: 10),
                     _buildTextField(
                         lastnameController, 'Lastname', Icons.person),
+                    SizedBox(height: 10),
+                    _buildTextField(
+                        phoneController, 'Phone Number', Icons.phone),
                     SizedBox(height: 10),
                     _buildTextField(emailController, 'Email', Icons.mail,
                         keyboardType: TextInputType.emailAddress),

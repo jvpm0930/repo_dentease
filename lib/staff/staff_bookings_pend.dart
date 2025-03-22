@@ -11,7 +11,8 @@ String formatDateTime(String dateTime) {
 
 class StaffBookingPendPage extends StatefulWidget {
   final String staffId;
-  const StaffBookingPendPage({super.key, required this.staffId});
+  final String clinicId;
+  const StaffBookingPendPage({super.key, required this.staffId, required this.clinicId});
 
   @override
   _StaffBookingPendPageState createState() => _StaffBookingPendPageState();
@@ -32,7 +33,9 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
         .from('bookings')
         .select(
             'booking_id, patient_id, service_id, clinic_id, date, status, patients(firstname), services(service_name)')
-        .eq('status', 'pending');
+        .or('status.eq.pending,status.eq.rejected')
+        .eq('clinic_id', widget.clinicId); // Filters bookings by clinicId
+
     return response;
   }
 
@@ -51,7 +54,7 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
   Widget build(BuildContext context) {
     return BackgroundCont(
         child: Scaffold(
-          backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text(
           "Pending Booking Request",
@@ -76,8 +79,8 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => StaffBookingApprvPage(
-                              staffId: widget.staffId),
+                          builder: (context) =>
+                              StaffBookingApprvPage(clinicId: widget.clinicId, staffId: widget.staffId),
                         ),
                       );
                     },
@@ -155,7 +158,7 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                                       });
                                     }
                                   },
-                                  items: ["pending", "approved"]
+                                  items: ["pending", "approved", "rejected"]
                                       .map<DropdownMenuItem<String>>(
                                           (String status) {
                                     return DropdownMenuItem<String>(
@@ -171,7 +174,8 @@ class _StaffBookingPendPageState extends State<StaffBookingPendPage> {
                                         booking['booking_id'].toString(),
                                         booking['status']);
                                   },
-                                  child: const Text("Update",
+                                  child: const Text(
+                                    "Update",
                                     style: TextStyle(color: Colors.blue),
                                   ),
                                 ),

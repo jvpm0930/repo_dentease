@@ -1,15 +1,16 @@
-import 'package:dentease/patients/patient_clinicv2.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ClinicCarousel extends StatefulWidget {
-  const ClinicCarousel({super.key});
+class ClinicFrontForDentStaff extends StatefulWidget {
+  final String clinicId;
+  const ClinicFrontForDentStaff({super.key, required this.clinicId});
 
   @override
-  _ClinicCarouselState createState() => _ClinicCarouselState();
+  _ClinicFrontForDentStaffState createState() =>
+      _ClinicFrontForDentStaffState();
 }
 
-class _ClinicCarouselState extends State<ClinicCarousel> {
+class _ClinicFrontForDentStaffState extends State<ClinicFrontForDentStaff> {
   final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> clinics = [];
   bool isLoading = true;
@@ -21,16 +22,18 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
     _fetchClinics();
   }
 
-  /// **🔹 Fetch only clinics where `status = 'approved'`**
+  // Fetch clinic details
   Future<void> _fetchClinics() async {
     try {
-      final List<dynamic> response = await supabase
+      // Fetch single clinic record
+      final Map<String, dynamic> response = await supabase
           .from('clinics')
-          .select('clinic_id, clinic_name')
-          .eq('status', 'approved'); // Only approved clinics
+          .select('clinic_name, profile_url')
+          .eq('clinic_id', widget.clinicId)
+          .single();
 
       setState(() {
-        clinics = List<Map<String, dynamic>>.from(response);
+        clinics = [response]; // Store as a list with one element
         isLoading = false;
       });
     } catch (e) {
@@ -66,27 +69,18 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
         itemBuilder: (context, index) {
           final clinic = clinics[index];
           final clinicName = clinic['clinic_name'] ?? 'Unknown Clinic';
+          final profileUrl = clinic['profile_url'] as String?;
 
-          return GestureDetector(
-            onTap: () {
-              // Navigate to the details page with only clinic_id
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      PatientClinicInfoPage(clinicId: clinic['clinic_id']),
-                ),
-              );
-            },
-            child: _buildClinicCard(context, clinicName),
-          );
+          // Build clinic card (not clickable)
+          return _buildClinicCard(context, clinicName, profileUrl);
         },
       ),
     );
   }
 
-  /// Creates a Clickable Clinic Card
-  Widget _buildClinicCard(BuildContext context, String title) {
+  /// Creates a Non-clickable Clinic Card with Network Image
+  Widget _buildClinicCard(
+      BuildContext context, String title, String? profileUrl) {
     return Container(
       width: 180, // Card width
       margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -108,8 +102,24 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
                 topRight: Radius.circular(20),
               ),
             ),
-            child:
-                Image.asset('assets/logo2.png', width: 100),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              child: profileUrl != null && profileUrl.isNotEmpty
+                  ? Image.network(
+                      profileUrl,
+                      width: double.infinity,
+                      height: 180,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Show fallback if URL is broken
+                        return Image.asset('assets/logo2.png', width: 100);
+                      },
+                    )
+                  : Image.asset('assets/logo2.png', width: 100),
+            ),
           ),
           Container(
             width: double.infinity,

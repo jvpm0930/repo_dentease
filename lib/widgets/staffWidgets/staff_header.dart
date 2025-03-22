@@ -11,6 +11,7 @@ class StaffHeader extends StatefulWidget {
 
 class _StaffHeaderState extends State<StaffHeader> {
   String? userEmail; // Stores logged-in user email
+  String? profileUrl;
 
   @override
   void initState() {
@@ -25,6 +26,28 @@ class _StaffHeaderState extends State<StaffHeader> {
       setState(() {
         userEmail = user.email; // Retrieve the email
       });
+      await _fetchProfileUrl(user.id);
+    }
+  }
+
+  Future<void> _fetchProfileUrl(String userId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('staffs')
+          .select('profile_url')
+          .eq('staff_id', userId)
+          .single();
+
+      if (response['profile_url'] != null) {
+        setState(() {
+          // Add cache-busting timestamp to avoid old cached images
+          final url = response['profile_url'];
+          profileUrl =
+              '$url?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile URL: $e');
     }
   }
 
@@ -77,9 +100,17 @@ class _StaffHeaderState extends State<StaffHeader> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 30,
-                    backgroundImage: AssetImage('assets/profile.png'),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage:
+                        profileUrl != null && profileUrl!.isNotEmpty
+                            ? NetworkImage(profileUrl!) // Load from Supabase
+                            : const AssetImage('assets/profile.png')
+                                as ImageProvider, // Fallback image
+                    child: profileUrl == null || profileUrl!.isEmpty
+                        ? const Icon(Icons.person, size: 30, color: Colors.grey)
+                        : null,
                   ),
                   const SizedBox(height: 8),
                   // Display Email if Available

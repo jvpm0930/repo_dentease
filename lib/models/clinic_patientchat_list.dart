@@ -1,4 +1,5 @@
 import 'package:dentease/models/clinicchatpage.dart';
+import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,6 +15,7 @@ class ClinicPatientChatList extends StatefulWidget {
 class _ClinicPatientChatListState extends State<ClinicPatientChatList> {
   final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> patients = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -21,70 +23,126 @@ class _ClinicPatientChatListState extends State<ClinicPatientChatList> {
     fetchPatients();
   }
 
-  /// Fetches patients based on clinic_id from `bookings`, retrieving patient details from `patients` table
+  /// Fetches patients based on `clinic_id` from `bookings`, retrieving patient details from `patients` table
   Future<void> fetchPatients() async {
-    final bookingResponse = await supabase
-        .from('bookings')
-        .select('patient_id')
-        .eq('clinic_id', widget.clinicId);
+    try {
+      final bookingResponse = await supabase
+          .from('bookings')
+          .select('patient_id')
+          .eq('clinic_id', widget.clinicId);
 
-    final patientIds =
-        bookingResponse.map((booking) => booking['patient_id']).toList();
+      final patientIds =
+          bookingResponse.map((booking) => booking['patient_id']).toList();
 
-    if (patientIds.isEmpty) {
+      if (patientIds.isEmpty) {
+        setState(() {
+          patients = [];
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Fetch patients from `patients` table based on patient_ids
+      final patientResponse = await supabase
+          .from('patients')
+          .select('patient_id, firstname, email')
+          .inFilter('patient_id', patientIds); // Corrected filter
+
       setState(() {
-        patients = [];
+        patients = List<Map<String, dynamic>>.from(patientResponse);
+        isLoading = false;
       });
-      return;
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching patients: $e')),
+      );
     }
-
-    final patientResponse = await supabase
-        .from('patients')
-        .select('patient_id, firstname, email')
-        .inFilter('patient_id', patientIds); // Fixed the filter
-
-    setState(() {
-      patients = List<Map<String, dynamic>>.from(patientResponse);
-    });
   }
-
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Patients List")),
-      body: patients.isEmpty
-          ? const Center(
-              child: CircularProgressIndicator()) // Show loading indicator
-          : ListView.builder(
-              itemCount: patients.length,
-              itemBuilder: (context, index) {
-                final patient = patients[index];
-                final patientId = patient['patient_id'] as String?;
-                final patientName = patient['firstname'] as String? ?? 'Unknown';
-                final patientEmail = patient['email'] as String? ?? '';
+    return BackgroundCont(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text(
+            "Patient List",
+            style: TextStyle(color: Colors.white),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator()) // Loading state
+            : patients.isEmpty
+                ? const Center(
+                    child: Text(
+                      "No Patient Messages",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: patients.length,
+                    itemBuilder: (context, index) {
+                      final patient = patients[index];
+                      final patientId = patient['patient_id'] as String?;
+                      final patientName =
+                          patient['firstname'] as String? ?? 'Unknown';
+                      final patientEmail = patient['email'] as String? ?? '';
 
-                return ListTile(
-                  title: Text(patientName),
-                  subtitle: Text(patientEmail),
-                  trailing: const Icon(Icons.chat, color: Colors.blue),
-                  onTap: () {
-                    if (patientId != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ClinicChatPage(
-                            patientId: patientId,
-                            patientName: patientName,
-                            clinicId: widget.clinicId,
+                      return Card(
+                        elevation: 4, // Shadow effect
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(12), // Rounded corners
+                        ),
+                        color:
+                            Colors.white.withOpacity(0.9), // Light background
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          title: Text(
+                            patientName,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
+                          subtitle: Text(
+                            patientEmail,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          trailing:
+                              const Icon(Icons.chat_bubble, color: Colors.blue),
+                          onTap: () {
+                            if (patientId != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ClinicChatPage(
+                                    patientId: patientId,
+                                    patientName: patientName,
+                                    clinicId: widget.clinicId,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       );
-                    }
-                  },
-                );
-              },
-            ),
+                    },
+                  ),
+      ),
     );
   }
 }

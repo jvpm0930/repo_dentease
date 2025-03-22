@@ -16,6 +16,7 @@ class _PatientProfileState extends State<PatientProfile> {
   final supabase = Supabase.instance.client;
   Map<String, dynamic>? patientDetails;
   bool isLoading = true;
+  String? profileUrl;
 
   @override
   void initState() {
@@ -27,12 +28,22 @@ class _PatientProfileState extends State<PatientProfile> {
     try {
       final response = await supabase
           .from('patients')
-          .select('firstname, lastname, email')
+          .select('firstname, lastname, phone, role, profile_url')
           .eq('patient_id', widget.patientId)
           .single();
 
       setState(() {
         patientDetails = response;
+
+        // Add cache-busting timestamp to profile URL
+        final url = response['profile_url'];
+        if (url != null && url.isNotEmpty) {
+          profileUrl =
+              '$url?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+        } else {
+          profileUrl = null;
+        }
+
         isLoading = false;
       });
     } catch (e) {
@@ -43,6 +54,19 @@ class _PatientProfileState extends State<PatientProfile> {
         isLoading = false;
       });
     }
+  }
+
+  Widget _buildProfilePicture() {
+    return CircleAvatar(
+      radius: 50,
+      backgroundColor: Colors.grey[300],
+      backgroundImage: profileUrl != null && profileUrl!.isNotEmpty
+          ? NetworkImage(profileUrl!)
+          : const AssetImage('assets/default_profile.png') as ImageProvider,
+      child: profileUrl == null || profileUrl!.isEmpty
+          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+          : null,
+    );
   }
 
   Widget _buildTextField(String hint) {
@@ -85,9 +109,12 @@ class _PatientProfileState extends State<PatientProfile> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  _buildProfilePicture(),
+                  const SizedBox(height: 16),
                   _buildTextField(patientDetails?['firstname'] ?? 'Firstname'),
                   _buildTextField(patientDetails?['lastname'] ?? 'Lastname'),
-                  _buildTextField(patientDetails?['email'] ?? 'Email'),
+                  _buildTextField(patientDetails?['phone'] ?? 'Phone Number'),
+                  _buildTextField(patientDetails?['role'] ?? 'Role'),
 
                   const SizedBox(height: 16),
 
@@ -107,14 +134,17 @@ class _PatientProfileState extends State<PatientProfile> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.indigo,
+                      backgroundColor: Colors.blue, // Button color
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: const Text('Edit Details'),
+                    child: const Text(
+                      'Edit Changes',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),

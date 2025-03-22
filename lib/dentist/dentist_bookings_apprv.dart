@@ -11,7 +11,8 @@ String formatDateTime(String dateTime) {
 
 class DentistBookingApprvPage extends StatefulWidget {
   final String dentistId;
-  const DentistBookingApprvPage({super.key, required this.dentistId});
+  final String clinicId;
+  const DentistBookingApprvPage({super.key, required this.dentistId, required this.clinicId});
 
   @override
   _DentistBookingApprvPageState createState() =>
@@ -33,20 +34,12 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
         .from('bookings')
         .select(
             'booking_id, patient_id, service_id, clinic_id, date, status, patients(firstname), services(service_name)')
-        .eq('status', 'approved');
+        .eq('status', 'approved')
+        .eq('clinic_id', widget.clinicId); // Filters bookings by clinicId
+
     return response;
   }
 
-  Future<void> _updateBookingStatus(String bookingId, String newStatus) async {
-    await supabase
-        .from('bookings')
-        .update({'status': newStatus}).eq('booking_id', bookingId);
-
-    // Refresh bookings list after update
-    setState(() {
-      _bookingsFuture = _fetchBookings();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +82,7 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DentistBookingPendPage(
+                          builder: (context) => DentistBookingPendPage(clinicId: widget.clinicId,
                               dentistId: widget.dentistId),
                         ),
                       );
@@ -123,7 +116,6 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
                   itemCount: bookings.length,
                   itemBuilder: (context, index) {
                     final booking = bookings[index];
-                    String currentStatus = booking['status'];
 
                     return Card(
                       margin: const EdgeInsets.all(10),
@@ -138,45 +130,11 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 5),
-                            Text(
-                                "Patient: ${booking['patients']['firstname']}"),
                             Text("Date: ${formatDateTime(booking['date'])}"),
                             const SizedBox(height: 5),
-
-                            // Status dropdown & update button
-                            Row(
-                              children: [
-                                const Text("Status: "),
-                                DropdownButton<String>(
-                                  value: currentStatus,
-                                  onChanged: (newStatus) {
-                                    if (newStatus != null) {
-                                      setState(() {
-                                        booking['status'] = newStatus;
-                                      });
-                                    }
-                                  },
-                                  items: ["pending", "approved"]
-                                      .map<DropdownMenuItem<String>>(
-                                          (String status) {
-                                    return DropdownMenuItem<String>(
-                                      value: status,
-                                      child: Text(status),
-                                    );
-                                  }).toList(),
-                                ),
-                                const SizedBox(width: 10),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _updateBookingStatus(
-                                        booking['booking_id'].toString(),
-                                        booking['status']);
-                                  },
-                                  child: const Text("Update", style: TextStyle(color: Colors.blue),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            Text("Status: ${booking['status']}",
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),

@@ -1,4 +1,4 @@
-import 'package:dentease/clinic/ownerSignup/dental_apply.dart';
+import 'package:dentease/clinic/ownerSignup/dental_clinic_apply.dart';
 import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -142,21 +142,25 @@ class _DentalSignupState extends State<DentalSignup> {
                   ),
                 ),
                 SizedBox(height: 10),
-                _buildTextField(emailController, 'Email', Icons.mail,
-                    readOnly: true),
-                SizedBox(height: 10),
                 _buildTextField(firstnameController, 'Firstname', Icons.person),
                 SizedBox(height: 10),
                 _buildTextField(lastnameController, 'Lastname', Icons.person),
                 SizedBox(height: 10),
-                _buildTextField(passwordController, 'Password', Icons.lock,
-                    isPassword: true),
-                SizedBox(height: 10),
                 _buildTextField(phoneController, 'Phone Number', Icons.phone),
                 SizedBox(height: 10),
-                _buildTextField(
-                    clinicController, 'Clinic ID', Icons.local_hospital,
+                Text(
+                  '* Reminder: Use this Email and Password to Login *',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+                SizedBox(height: 10),
+                _buildTextField(emailController, 'Email', Icons.mail,
                     readOnly: true),
+                SizedBox(height: 10),
+                _buildTextField(passwordController, 'Password', Icons.lock,
+                    isPassword: true),
                 SizedBox(height: 20),
                 _buildSignUpButton(),
               ],

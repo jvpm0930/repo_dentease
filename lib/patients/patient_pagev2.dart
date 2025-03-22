@@ -1,5 +1,5 @@
 import 'package:dentease/widgets/background_cont.dart';
-import 'package:dentease/widgets/patientWidgets/clinic_slider.dart';
+import 'package:dentease/widgets/clinicWidgets/clinic_slider.dart';
 import 'package:dentease/widgets/patientWidgets/patient_footer.dart';
 import 'package:dentease/widgets/patientWidgets/patient_header.dart';
 import 'package:flutter/material.dart';

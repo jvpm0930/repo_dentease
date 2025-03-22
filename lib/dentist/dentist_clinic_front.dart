@@ -1,9 +1,10 @@
+import 'package:dentease/clinic/ownerSignup/dentease_moreDetails.dart';
+import 'package:dentease/widgets/clinicWidgets/forDentStaff_clinicPage.dart';
 import 'package:flutter/material.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:dentease/widgets/dentistWidgets/dentist_footer.dart';
 import 'package:dentease/widgets/dentistWidgets/dentist_header.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DentClinicPage extends StatefulWidget {
   final String clinicId;
@@ -103,68 +104,43 @@ class _DentClinicPageState extends State<DentClinicPage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const SizedBox(height: 30),
+                                ClinicFrontForDentStaff(
+                                    clinicId: widget.clinicId),
+                                const SizedBox(height: 30),
+                                const Text(
+                                    "Above is Clinics Front Card In Patients Page"),
+                                const SizedBox(height: 10),
                                 _buildDetailRow('Status:',
                                     clinicDetails?['status'] ?? 'N/A'),
                                 _buildDetailRow('Clinic Name:',
                                     clinicDetails?['clinic_name'] ?? 'N/A'),
-                                _buildDetailRow('Address:',
-                                    clinicDetails?['address'] ?? 'N/A'),
-
-                                // Map Widget (only if lat/lng exists)
-                                if (clinicDetails?['latitude'] != null &&
-                                    clinicDetails?['longitude'] != null)
-                                  const SizedBox(height: 8),
-                                if (clinicDetails?['latitude'] != null &&
-                                    clinicDetails?['longitude'] != null)
-                                  SizedBox(
-                                    height: 150,
-                                    child: GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(
-                                          clinicDetails!['latitude'],
-                                          clinicDetails!['longitude'],
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Navigate to DentClinicMore page
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ClinicDetails(
+                                          clinicId: widget.clinicId,
                                         ),
-                                        zoom: 15,
                                       ),
-                                      markers: {
-                                        Marker(
-                                          markerId:
-                                              const MarkerId('clinicLocation'),
-                                          position: LatLng(
-                                            clinicDetails!['latitude'],
-                                            clinicDetails!['longitude'],
-                                          ),
-                                        ),
-                                      },
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.blue, // Button color
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                const SizedBox(height: 8),
-
-                                // License Image (only if URL exists)
-                                if (clinicDetails?['license_url'] != null)
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'License:',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
-                                          clinicDetails!['license_url'],
-                                          height: 150,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ],
+                                  child: const Text(
+                                    'More Details',
+                                    style: TextStyle(color: Colors.white),
                                   ),
+                                ),
                               ],
                             ),
                           ),
@@ -172,7 +148,8 @@ class _DentClinicPageState extends State<DentClinicPage> {
             ),
 
             // Dentist Footer (only if `dentistId` is fetched)
-            if (dentistId != null) DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
+            if (dentistId != null)
+              DentistFooter(clinicId: widget.clinicId, dentistId: dentistId!),
           ],
         ),
       ),

@@ -11,7 +11,8 @@ String formatDateTime(String dateTime) {
 
 class StaffBookingApprvPage extends StatefulWidget {
   final String staffId;
-  const StaffBookingApprvPage({super.key, required this.staffId});
+  final String clinicId;
+  const StaffBookingApprvPage({super.key, required this.staffId, required this.clinicId});
 
   @override
   _StaffBookingApprvPageState createState() =>
@@ -33,19 +34,10 @@ class _StaffBookingApprvPageState extends State<StaffBookingApprvPage> {
         .from('bookings')
         .select(
             'booking_id, patient_id, service_id, clinic_id, date, status, patients(firstname), services(service_name)')
-        .eq('status', 'approved');
+        .eq('status', 'approved')
+        .eq('clinic_id', widget.clinicId); // Filters bookings by clinicId
+
     return response;
-  }
-
-  Future<void> _updateBookingStatus(String bookingId, String newStatus) async {
-    await supabase
-        .from('bookings')
-        .update({'status': newStatus}).eq('booking_id', bookingId);
-
-    // Refresh bookings list after update
-    setState(() {
-      _bookingsFuture = _fetchBookings();
-    });
   }
 
   @override
@@ -89,7 +81,7 @@ class _StaffBookingApprvPageState extends State<StaffBookingApprvPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => StaffBookingPendPage(
+                          builder: (context) => StaffBookingPendPage(clinicId: widget.clinicId,
                               staffId: widget.staffId),
                         ),
                       );
@@ -123,7 +115,6 @@ class _StaffBookingApprvPageState extends State<StaffBookingApprvPage> {
                   itemCount: bookings.length,
                   itemBuilder: (context, index) {
                     final booking = bookings[index];
-                    String currentStatus = booking['status'];
 
                     return Card(
                       margin: const EdgeInsets.all(10),
@@ -138,46 +129,11 @@ class _StaffBookingApprvPageState extends State<StaffBookingApprvPage> {
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 5),
-                            Text(
-                                "Patient: ${booking['patients']['firstname']}"),
                             Text("Date: ${formatDateTime(booking['date'])}"),
                             const SizedBox(height: 5),
-
-                            // Status dropdown & update button
-                            Row(
-                              children: [
-                                const Text("Status: "),
-                                DropdownButton<String>(
-                                  value: currentStatus,
-                                  onChanged: (newStatus) {
-                                    if (newStatus != null) {
-                                      setState(() {
-                                        booking['status'] = newStatus;
-                                      });
-                                    }
-                                  },
-                                  items: ["pending", "approved"]
-                                      .map<DropdownMenuItem<String>>(
-                                          (String status) {
-                                    return DropdownMenuItem<String>(
-                                      value: status,
-                                      child: Text(status),
-                                    );
-                                  }).toList(),
-                                ),
-                                const SizedBox(width: 10),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _updateBookingStatus(
-                                        booking['booking_id'].toString(),
-                                        booking['status']);
-                                  },
-                                  child: const Text("Update",
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            Text("Status: ${booking['status']}",
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),

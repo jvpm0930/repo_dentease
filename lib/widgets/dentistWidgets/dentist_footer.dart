@@ -1,5 +1,5 @@
 import 'package:dentease/dentist/dentist_bookings_apprv.dart';
-import 'package:dentease/dentist/dentist_details.dart';
+import 'package:dentease/dentist/dentist_profile.dart';
 import 'package:dentease/dentist/dentist_page.dart';
 import 'package:dentease/models/clinic_patientchat_list.dart';
 import 'package:flutter/material.dart';
@@ -70,11 +70,11 @@ class _DentistFooterState extends State<DentistFooter> {
                 DentistPage(
                     clinicId: widget.clinicId, dentistId: widget.dentistId)),
             _buildNavImage('assets/icons/calendar.png', context,
-                DentistBookingApprvPage(dentistId: widget.dentistId)),
+                DentistBookingApprvPage(clinicId: widget.clinicId, dentistId: widget.dentistId)),
             _buildNavImage(
                 'assets/icons/chat.png', context, ClinicPatientChatList(clinicId: widget.clinicId)),
             _buildNavImage('assets/icons/profile.png', context,
-                DentistDetailsPage(dentistId: widget.dentistId)),
+                DentistProfile(dentistId: widget.dentistId)),
           ],
         ),
       ),

@@ -1,4 +1,4 @@
-import 'package:dentease/dentist/dentist_clinic_details.dart'; // Import new page
+import 'package:dentease/dentist/dentist_clinic_front.dart'; // Import new page
 import 'package:dentease/dentist/dentist_clinic_sched.dart';
 import 'package:dentease/dentist/dentist_clinic_services.dart';
 import 'package:dentease/dentist/dentist_list.dart';

@@ -15,10 +15,10 @@ class DentalSuccess extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                  Image.asset('assets/logo2.png', width: 500), // App Logo
+                  Image.asset('assets/logo2.png', width: 500),
                   SizedBox(height: 20),
                   Text(
-                    'Wait for email verification for your application',
+                    'You can now Login, Wait for admin verification for your Clinic application',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

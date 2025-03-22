@@ -32,10 +32,11 @@ class _PatientBookingPendState extends State<PatientBookingPend> {
         .from('bookings')
         .select(
             'booking_id, patient_id, service_id, clinic_id, date, status, services(service_name)')
-        .eq('status', 'pending')
+        .or('status.eq.pending,status.eq.rejected') // Alternative for filtering multiple statuses
         .eq('patient_id', widget.patientId);
     return response;
   }
+
 
   @override
   Widget build(BuildContext context) {

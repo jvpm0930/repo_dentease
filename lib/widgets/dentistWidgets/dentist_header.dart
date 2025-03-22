@@ -10,21 +10,48 @@ class DentistHeader extends StatefulWidget {
 }
 
 class _DentistHeaderState extends State<DentistHeader> {
-  String? userEmail; // Stores logged-in user email
+  String? userEmail; // Stores logged-in user's email
+  String? profileUrl; // Stores the dentist's profile picture URL
 
   @override
   void initState() {
     super.initState();
-    _fetchUserEmail();
+    _fetchUserDetails();
   }
 
-  // Fetches the currently logged-in user's email
-  Future<void> _fetchUserEmail() async {
+  // Fetches the currently logged-in user's email and profile picture
+  Future<void> _fetchUserDetails() async {
     final user = Supabase.instance.client.auth.currentUser;
+
     if (user != null) {
       setState(() {
         userEmail = user.email; // Retrieve the email
       });
+
+      // Fetch dentist profile details
+      await _fetchProfileUrl(user.id);
+    }
+  }
+
+  // Fetch the dentist's profile picture URL from the database
+  Future<void> _fetchProfileUrl(String userId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('dentists')
+          .select('profile_url')
+          .eq('dentist_id', userId)
+          .single();
+
+      if (response['profile_url'] != null) {
+        setState(() {
+          // Add cache-busting timestamp to avoid old cached images
+          final url = response['profile_url'];
+          profileUrl =
+              '$url?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile URL: $e');
     }
   }
 
@@ -77,9 +104,18 @@ class _DentistHeaderState extends State<DentistHeader> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
+                  // Profile Picture with Fallback
+                  CircleAvatar(
                     radius: 30,
-                    backgroundImage: AssetImage('assets/profile.png'),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage:
+                        profileUrl != null && profileUrl!.isNotEmpty
+                            ? NetworkImage(profileUrl!) // Load from Supabase
+                            : const AssetImage('assets/profile.png')
+                                as ImageProvider, // Fallback image
+                    child: profileUrl == null || profileUrl!.isEmpty
+                        ? const Icon(Icons.person, size: 30, color: Colors.grey)
+                        : null,
                   ),
                   const SizedBox(height: 8),
                   // Display Email if Available

@@ -1,6 +1,18 @@
 import 'dart:async';
+import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
+
+String _formatTimestamp(String timestamp) {
+  final DateTime dateTime = DateTime.parse(timestamp).toLocal();
+  return DateFormat('h:mm a').format(dateTime);
+}
+
+String _formatDate(String timestamp) {
+  final DateTime dateTime = DateTime.parse(timestamp).toLocal();
+  return DateFormat('MMM d, yyyy').format(dateTime);
+}
 
 class ClinicChatPage extends StatefulWidget {
   final String patientId;
@@ -28,7 +40,7 @@ class _ClinicChatPageState extends State<ClinicChatPage> {
   void initState() {
     super.initState();
     fetchMessages();
-    startAutoRefresh(); // Start the timer
+    startAutoRefresh();
   }
 
   /// Starts auto-refresh every 1 second
@@ -61,10 +73,10 @@ class _ClinicChatPageState extends State<ClinicChatPage> {
         'receiver_id': widget.patientId,
         'sender_id': widget.clinicId,
         'message': text,
-        'timestamp': DateTime.now().toIso8601String(),
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
       });
       messageController.clear();
-      fetchMessages(); // Fetch messages after sending
+      fetchMessages();
     } catch (e) {
       print("Error sending message: $e");
     }
@@ -72,61 +84,99 @@ class _ClinicChatPageState extends State<ClinicChatPage> {
 
   @override
   void dispose() {
-    refreshTimer?.cancel(); // Cancel the timer when page is closed
+    refreshTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Chat with ${widget.patientName}")),
+    Map<String, List<Map<String, dynamic>>> groupedMessages = {};
+
+    //Group messages by date
+    for (var message in messages) {
+      String dateKey = _formatDate(message['timestamp']);
+      if (!groupedMessages.containsKey(dateKey)) {
+        groupedMessages[dateKey] = [];
+      }
+      groupedMessages[dateKey]!.add(message);
+    }
+
+    return BackgroundCont(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text(
+          "Chat with ${widget.patientName}",
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent, // Transparent AppBar
+        elevation: 0, // Remove shadow
+        iconTheme: const IconThemeData(color: Colors.white), // White icons
+      ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              reverse: false,
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                final isMe = message['sender_id'] == widget.clinicId;
+              itemCount: groupedMessages.length,
+              itemBuilder: (context, groupIndex) {
+                String date = groupedMessages.keys.elementAt(groupIndex);
+                List<Map<String, dynamic>> dayMessages = groupedMessages[date]!;
 
-                return Align(
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.blue[200] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        date,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: isMe
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          message['message'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isMe ? Colors.white : Colors.black87,
+                    ...dayMessages.map((message) {
+                      final isMe = message['sender_id'] == widget.clinicId;
+                      return Align(
+                        alignment:
+                            isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 5, horizontal: 10),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.blue[200] : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: isMe
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                message['message'],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: isMe ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                _formatTimestamp(message['timestamp']),
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.grey[700]),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 5),
-                        Text(
-                          _formatTimestamp(message['timestamp']),
-                          style:
-                              TextStyle(fontSize: 10, color: Colors.grey[700]),
-                        ),
-                      ],
-                    ),
-                  ),
+                      );
+                    }),
+                  ],
                 );
               },
             ),
           ),
-          // Message Input Field
           Padding(
             padding: EdgeInsets.all(10),
             child: Row(
@@ -153,11 +203,7 @@ class _ClinicChatPageState extends State<ClinicChatPage> {
           ),
         ],
       ),
+    )
     );
-  }
-
-  String _formatTimestamp(String timestamp) {
-    final DateTime dateTime = DateTime.parse(timestamp).toLocal();
-    return "${dateTime.hour}:${dateTime.minute}";
   }
 }

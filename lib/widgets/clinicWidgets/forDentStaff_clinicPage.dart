@@ -1,3 +1,4 @@
+import 'package:dentease/clinic/dentease_profUpdate.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -71,18 +72,35 @@ class _ClinicFrontForDentStaffState extends State<ClinicFrontForDentStaff> {
           final clinicName = clinic['clinic_name'] ?? 'Unknown Clinic';
           final profileUrl = clinic['profile_url'] as String?;
 
-          // Build clinic card (not clickable)
-          return _buildClinicCard(context, clinicName, profileUrl);
+          // Build clinic card (clickable to edit)
+          return GestureDetector(
+            onTap: () async {
+              final updated = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UpdateProfileImage(
+                    clinicId: widget.clinicId,
+                    profileUrl: profileUrl,
+                  ),
+                ),
+              );
+
+              // Refresh data after updating
+              if (updated == true) {
+                _fetchClinics();
+              }
+            },
+            child: _buildClinicCard(context, clinicName, profileUrl),
+          );
         },
       ),
     );
   }
 
-  /// Creates a Non-clickable Clinic Card with Network Image
   Widget _buildClinicCard(
       BuildContext context, String title, String? profileUrl) {
     return Container(
-      width: 180, // Card width
+      width: 200, // Card width
       margin: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -93,8 +111,8 @@ class _ClinicFrontForDentStaffState extends State<ClinicFrontForDentStaff> {
       child: Column(
         children: [
           Container(
-            width: double.infinity,
-            height: 180,
+            width: 200,
+            height: 200,
             decoration: BoxDecoration(
               color: Colors.blue.shade100,
               borderRadius: const BorderRadius.only(
@@ -110,15 +128,27 @@ class _ClinicFrontForDentStaffState extends State<ClinicFrontForDentStaff> {
               child: profileUrl != null && profileUrl.isNotEmpty
                   ? Image.network(
                       profileUrl,
-                      width: double.infinity,
-                      height: 180,
-                      fit: BoxFit.cover,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit
+                          .cover, // Use BoxFit.cover for filling without distortion
                       errorBuilder: (context, error, stackTrace) {
-                        // Show fallback if URL is broken
-                        return Image.asset('assets/logo2.png', width: 100);
+                        return Image.asset(
+                          'assets/logo2.png',
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover, // Same fit for fallback
+                        );
                       },
                     )
-                  : Image.asset('assets/logo2.png', width: 100),
+                  : Image.asset(
+                      'assets/logo2.png',
+                      width: 200,
+                      height: 200,
+                      fit:
+                          BoxFit.cover, // Ensures fallback image fits correctly
+                    ),
+
             ),
           ),
           Container(

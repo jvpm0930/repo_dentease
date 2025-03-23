@@ -91,82 +91,92 @@ class _PatientClinicInfoPageState extends State<PatientClinicInfoPage> {
                       style: const TextStyle(color: Colors.red)))
               : clinic == null
                   ? const Center(child: Text("Clinic not found"))
-                  : Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Clinic Name
-                          Text(
-                            clinic!['clinic_name'] ?? 'Unknown Clinic',
-                            style: const TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Clinic Info
-                          Text(
-                            clinic!['info'] ?? 'No clinic info available',
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.white),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Clinic Address
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on, color: Colors.red),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  clinic!['address'] ?? 'No address available',
-                                  style: const TextStyle(
-                                      fontSize: 16, color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Map Display
-                          if (clinic!['latitude'] != null &&
-                              clinic!['longitude'] != null)
-                            GestureDetector(
-                              onTap: () => _openGoogleMaps(
-                                clinic!['latitude'],
-                                clinic!['longitude'],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  "https://maps.googleapis.com/maps/api/staticmap?"
-                                  "center=${clinic!['latitude']},${clinic!['longitude']}"
-                                  "&zoom=15&size=400x300&maptype=roadmap"
-                                  "&markers=color:red%7C${clinic!['latitude']},${clinic!['longitude']}"
-                                  "&key=AIzaSyBg-fAm25WSVmO768I42gecvL80vuJiuh4", // Replace with your API key
-                                  width: double.infinity,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Image.asset('assets/placeholder_map.png',
-                                          fit: BoxFit.cover),
-                                ),
-                              ),
+                  : SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Clinic Name
+                            Text(
+                              clinic!['clinic_name'] ?? 'Unknown Clinic',
+                              style: const TextStyle(
+                                  fontSize: 22, fontWeight: FontWeight.bold),
                             ),
-                          const SizedBox(height: 20),
+                            const SizedBox(height: 10),
 
-                          // Services List
-                          const Text(
-                            "Services Offered:",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10),
-                          services.isEmpty
-                              ? const Text("No approved services available.",
-                                  style: TextStyle(color: Colors.grey))
-                              : Expanded(
-                                  child: ListView.builder(
+                            // Clinic Info
+                            Text(
+                              clinic!['info'] ?? 'No clinic info available',
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.black),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Clinic Address
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on,
+                                    color: Colors.red),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    clinic!['address'] ??
+                                        'No address available',
+                                    style: const TextStyle(
+                                        fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+
+                            // Map Display
+                            if (clinic!['latitude'] != null &&
+                                clinic!['longitude'] != null)
+                              GestureDetector(
+                                onTap: () => _openGoogleMaps(
+                                  clinic!['latitude'],
+                                  clinic!['longitude'],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    "https://maps.googleapis.com/maps/api/staticmap?"
+                                    "center=${clinic!['latitude']},${clinic!['longitude']}"
+                                    "&zoom=15&size=400x300&maptype=roadmap"
+                                    "&markers=color:red%7C${clinic!['latitude']},${clinic!['longitude']}"
+                                    "&key=AIzaSyBg-fAm25WSVmO768I42gecvL80vuJiuh4", // Replace with your API key
+                                    width: double.infinity,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                                'assets/placeholder_map.png',
+                                                fit: BoxFit.cover),
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 20),
+
+                            // Services List
+                            const Text(
+                              "Services Offered:",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10),
+                            services.isEmpty
+                                ? const Text(
+                                    "No approved services available.",
+                                    style: TextStyle(color: Colors.grey),
+                                  )
+                                : ListView.builder(
+                                    shrinkWrap:
+                                        true, // Ensures ListView takes only required space
+                                    physics:
+                                        const NeverScrollableScrollPhysics(), // Disable inner scrolling
                                     itemCount: services.length,
                                     itemBuilder: (context, index) {
                                       final service = services[index];
@@ -196,9 +206,8 @@ class _PatientClinicInfoPageState extends State<PatientClinicInfoPage> {
                                       );
                                     },
                                   ),
-
-                                ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
     ));

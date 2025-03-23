@@ -1,8 +1,8 @@
-import 'package:dentease/clinic/ownerSignup/dental_signup.dart';
+import 'package:dentease/clinic/signup/dental_signup.dart';
 import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../login/login_screen.dart';
+import '../../../login/login_screen.dart';
 
 class DentalApplyFirst extends StatefulWidget {
   const DentalApplyFirst({super.key});

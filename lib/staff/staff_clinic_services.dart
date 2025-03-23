@@ -96,7 +96,7 @@ class _StaffServListPageState extends State<StaffServListPage> {
           children: [
             const DentistHeader(),
             Padding(
-              padding: const EdgeInsets.only(top: 150, bottom: 50),
+              padding: const EdgeInsets.only(top: 150, bottom: 100),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(

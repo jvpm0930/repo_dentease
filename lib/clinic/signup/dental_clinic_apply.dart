@@ -1,6 +1,6 @@
   import 'dart:io';
-  import 'package:dentease/clinic/ownerSignup/dental_success.dart';
-  import 'package:flutter/material.dart';
+  import 'package:dentease/clinic/signup/dental_success.dart';
+import 'package:flutter/material.dart';
   import 'package:dentease/widgets/background_container.dart';
   import 'package:image_picker/image_picker.dart';
   import 'package:supabase_flutter/supabase_flutter.dart';

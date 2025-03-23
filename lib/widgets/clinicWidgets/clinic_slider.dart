@@ -92,7 +92,7 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
   Widget _buildClinicCard(
       BuildContext context, String title, String? profileUrl) {
     return Container(
-      width: 180, // Card width
+      width: 200, // Card width
       margin: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -103,8 +103,8 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
       child: Column(
         children: [
           Container(
-            width: double.infinity,
-            height: 180,
+            width: 200,
+            height: 200,
             decoration: BoxDecoration(
               color: Colors.blue.shade100,
               borderRadius: const BorderRadius.only(
@@ -120,8 +120,8 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
                     ),
                     child: Image.network(
                       profileUrl,
-                      width: double.infinity,
-                      height: 180,
+                      width: 200,
+                      height: 200,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return const Icon(Icons.broken_image,

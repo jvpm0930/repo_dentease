@@ -1,4 +1,4 @@
-import 'package:dentease/clinic/ownerSignup/dental_clinic_apply.dart';
+import 'package:dentease/clinic/signup/dental_clinic_apply.dart';
 import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

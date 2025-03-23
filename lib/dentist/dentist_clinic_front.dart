@@ -1,4 +1,4 @@
-import 'package:dentease/clinic/ownerSignup/dentease_moreDetails.dart';
+import 'package:dentease/clinic/dentease_moreDetails.dart';
 import 'package:dentease/widgets/clinicWidgets/forDentStaff_clinicPage.dart';
 import 'package:flutter/material.dart';
 import 'package:dentease/widgets/background_cont.dart';
@@ -109,6 +109,8 @@ class _DentClinicPageState extends State<DentClinicPage> {
                                 const SizedBox(height: 30),
                                 const Text(
                                     "Above is Clinics Front Card In Patients Page"),
+                                const Text(
+                                    "click the image to change it"),
                                 const SizedBox(height: 10),
                                 _buildDetailRow('Status:',
                                     clinicDetails?['status'] ?? 'N/A'),

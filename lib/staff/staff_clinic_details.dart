@@ -1,4 +1,4 @@
-import 'package:dentease/clinic/ownerSignup/dentease_moreDetails.dart';
+import 'package:dentease/clinic/dentease_moreDetails.dart';
 import 'package:dentease/widgets/clinicWidgets/forDentStaff_clinicPage.dart';
 import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
 import 'package:dentease/widgets/staffWidgets/staff_header.dart';

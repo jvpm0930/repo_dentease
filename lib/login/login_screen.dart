@@ -1,5 +1,5 @@
 import 'package:dentease/admin/pages/clinics/admin_dentease_first.dart';
-import 'package:dentease/clinic/ownerSignup/dental_clinic_signup.dart';
+import 'package:dentease/clinic/signup/dental_clinic_signup.dart';
 import 'package:dentease/staff/staff_page.dart';
 import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';

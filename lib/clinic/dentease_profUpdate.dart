@@ -41,24 +41,22 @@ class _UpdateProfileImageState extends State<UpdateProfileImage> {
             fileOptions: FileOptions(contentType: 'image/jpeg'),
           );
 
-      if (response != null) {
-        // Get the public URL of the uploaded image
-        final newImageUrl =
-            supabase.storage.from('clinic-profile').getPublicUrl(fileName);
+      // Get the public URL of the uploaded image
+      final newImageUrl =
+          supabase.storage.from('clinic-profile').getPublicUrl(fileName);
 
-        // Update the clinic profile URL in Supabase
-        await supabase.from('clinics').update({'profile_url': newImageUrl}).eq(
-            'clinic_id', widget.clinicId);
+      // Update the clinic profile URL in Supabase
+      await supabase.from('clinics').update({'profile_url': newImageUrl}).eq(
+          'clinic_id', widget.clinicId);
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Profile image updated successfully!')),
-          );
-          Navigator.pop(context, true);
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Profile image updated successfully!')),
+        );
+        Navigator.pop(context, true);
       }
-    } catch (e) {
+        } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error uploading image: $e')),

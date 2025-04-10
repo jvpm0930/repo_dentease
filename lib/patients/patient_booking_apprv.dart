@@ -24,124 +24,132 @@ class _PatientBookingApprvState extends State<PatientBookingApprv> {
   @override
   void initState() {
     super.initState();
-    _bookingsFuture = _fetchBookings();
+    _fetchBookings();
   }
 
-  Future<List<Map<String, dynamic>>> _fetchBookings() async {
-    final response = await supabase
-        .from('bookings')
-        .select(
-            'booking_id, patient_id, service_id, clinic_id, date, status, services(service_name)')
-        .eq('status', 'approved')
-        .eq('patient_id', widget.patientId);
-    return response;
+  Future<void> _fetchBookings() async {
+    setState(() {
+      _bookingsFuture = supabase
+          .from('bookings')
+          .select(
+              'booking_id, patient_id, service_id, clinic_id, date, status, services!inner(service_name), clinics!inner(clinic_name)')
+          .eq('status', 'approved')
+          .eq('patient_id', widget.patientId);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return BackgroundCont(
-        child: Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text(
-          "Approved Booking Request",
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Column(
-        children: [
-          // Buttons for switching between Approved & Pending
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed:
-                        null, // Disable the "Approved" button in this page
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300], // Disabled background
-                      foregroundColor: Colors.grey[600], // Disabled text color
-                    ),
-                    child: const Text("Approved"),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              PatientBookingPend(patientId: widget.patientId),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // Active color
-                      foregroundColor: Colors.white, // Active text color
-                    ),
-                    child: const Text("Pending"),
-                  ),
-                ),
-              ],
-            ),
+        appBar: AppBar(
+          title: const Text(
+            "Approved Booking Request",
+            style: TextStyle(color: Colors.white),
           ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: Column(
+          children: [
+            // Buttons for switching between Approved & Pending
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: null, // Disabled (Already on this page)
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.grey[600],
+                      ),
+                      child: const Text("Approved"),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PatientBookingPend(patientId: widget.patientId),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text("Pending"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-          // Booking list
-          Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _bookingsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No approved bookings"));
-                }
+            // Booking list
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _bookingsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text("No approved bookings"));
+                  }
 
-                final bookings = snapshot.data!;
+                  final bookings = snapshot.data!;
 
-                return ListView.builder(
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
+                  return RefreshIndicator(
+                    onRefresh: _fetchBookings,
+                    child: ListView.builder(
+                      itemCount: bookings.length,
+                      itemBuilder: (context, index) {
+                        final booking = bookings[index];
 
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(10),
+                            title: Text(
                               booking['services']['service_name'],
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 5),
-                            Text("Date: ${formatDateTime(booking['date'])}"),
-                            const SizedBox(height: 5),
-                            Text("Status: ${booking['status']}",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    "Date: ${formatDateTime(booking['date'])}"),
+                                Text(
+                                    "Clinic: ${booking['clinics']['clinic_name']}"),
+                                Text("Status: ${booking['status']}",
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            trailing:
+                                const Icon(Icons.info, color: Colors.blue),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

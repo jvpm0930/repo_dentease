@@ -3,16 +3,16 @@ import 'package:dentease/widgets/background_container.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DentAddStaff extends StatefulWidget {
+class DentAddPatient extends StatefulWidget {
   final String clinicId;
 
-  const DentAddStaff({super.key, required this.clinicId});
+  const DentAddPatient({super.key, required this.clinicId});
 
   @override
-  _DentAddStaffState createState() => _DentAddStaffState();
+  _DentAddPatientState createState() => _DentAddPatientState();
 }
 
-class _DentAddStaffState extends State<DentAddStaff> {
+class _DentAddPatientState extends State<DentAddPatient> {
   final supabase = Supabase.instance.client;
 
   final firstnameController = TextEditingController();
@@ -20,12 +20,10 @@ class _DentAddStaffState extends State<DentAddStaff> {
   final passwordController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
-  late TextEditingController clinicController;
 
   @override
   void initState() {
     super.initState();
-    clinicController = TextEditingController(text: widget.clinicId);
   }
 
   Future<void> signUp() async {
@@ -35,7 +33,6 @@ class _DentAddStaffState extends State<DentAddStaff> {
       final phone = phoneController.text.trim();
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
-      final clinicId = clinicController.text.trim();
 
       if (firstname.isEmpty ||
           lastname.isEmpty ||
@@ -66,14 +63,13 @@ class _DentAddStaffState extends State<DentAddStaff> {
         return;
       }
 
-      await supabase.from('staffs').insert({
-        'staff_id': user.id, 
+      await supabase.from('patients').insert({
+        'staff_id': user.id,
         'firstname': firstname,
         'lastname': lastname,
         'email': email,
         'phone': phone,
-        'clinic_id': clinicId,
-        'role': 'staff',
+        'role': 'patient',
       });
 
       _showSnackbar('Login to Verify');
@@ -103,8 +99,7 @@ class _DentAddStaffState extends State<DentAddStaff> {
               children: [
                 const SizedBox(height: 30),
                 Image.asset('assets/logo2.png', width: 500),
-                const Text('Add Staff',
-                    style: TextStyle(color: Colors.white)),
+                const Text('Add Patient', style: TextStyle(color: Colors.white)),
                 const SizedBox(height: 10),
                 _buildTextField(emailController, 'Email', Icons.mail),
                 const SizedBox(height: 10),

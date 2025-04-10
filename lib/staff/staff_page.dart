@@ -1,3 +1,4 @@
+import 'package:dentease/clinic/dentease_patientList.dart';
 import 'package:dentease/staff/staff_clinic_details.dart';
 import 'package:dentease/staff/staff_clinic_services.dart';
 import 'package:dentease/staff/staff_dentist_list.dart';
@@ -121,13 +122,13 @@ class _StaffPageState extends State<StaffPage> {
                 child: Column(
                   children: [
                     _buildCustomButton(
-                      title: "Clinic Details",
+                      title: "Clinic Patients",
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                StaffClinicPage(clinicId: clinicId!),
+                                ClinicPatientListPage(clinicId: clinicId!),
                           ),
                         );
                       },
@@ -179,6 +180,18 @@ class _StaffPageState extends State<StaffPage> {
                               clinicId: widget.clinicId,
                               staffId: widget.staffId,
                             ),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildCustomButton(
+                      title: "Clinic Details",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StaffClinicPage(clinicId: clinicId!),
                           ),
                         );
                       },

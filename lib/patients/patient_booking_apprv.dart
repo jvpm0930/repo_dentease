@@ -137,8 +137,10 @@ class _PatientBookingApprvState extends State<PatientBookingApprv> {
                                         fontWeight: FontWeight.bold)),
                               ],
                             ),
-                            trailing:
-                                const Icon(Icons.info, color: Colors.blue),
+                            trailing: const Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: Icon(Icons.info, color: Colors.blue),
+                            ),
                           ),
                         );
                       },

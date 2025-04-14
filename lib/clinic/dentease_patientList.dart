@@ -127,7 +127,7 @@ class _ClinicPatientListPageState extends State<ClinicPatientListPage> {
                                               "Email: ${patient['email'] ?? 'N/A'}"),
                                           Text(
                                               "Phone: ${patient['phone'] ?? 'N/A'}"),
-                                        ],
+                                        ], 
                                       ),
                                       leading: const Icon(Icons.person),
                                     ),

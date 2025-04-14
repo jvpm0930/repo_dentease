@@ -1,4 +1,6 @@
 import 'package:dentease/login/login_screen.dart';
+import 'package:dentease/widgets/clinicWidgets/nearbyClinic.dart';
+import 'package:dentease/widgets/clinicWidgets/nearbyClinicButton.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -101,12 +103,23 @@ class _PatientHeaderState extends State<PatientHeader> {
           ),
           const SizedBox(height: 10),
           const Text(
-            "Explore\nServices Today",
+            "Explore Services Today",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
+          ),
+          const SizedBox(height: 10),
+          NearbyClinicsButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ClinicMapPage(),
+                ),
+              );
+            },
           ),
         ],
       ),

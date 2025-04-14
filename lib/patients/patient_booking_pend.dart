@@ -31,7 +31,7 @@ class _PatientBookingPendState extends State<PatientBookingPend> {
     final response = await supabase
         .from('bookings')
         .select(
-            'booking_id, patient_id, service_id, clinic_id, date, status, services(service_name)')
+            'booking_id, patient_id, service_id, clinic_id, date, status, clinics(clinic_name), services(service_name)')
         .or('status.eq.pending,status.eq.rejected') // Alternative for filtering multiple statuses
         .eq('patient_id', widget.patientId);
     return response;
@@ -126,9 +126,9 @@ class _PatientBookingPendState extends State<PatientBookingPend> {
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 5),
                             Text("Date: ${formatDateTime(booking['date'])}"),
-                            const SizedBox(height: 5),
+                            Text(
+                                "Clinic: ${booking['clinics']['clinic_name']}"),
                             Text("Status: ${booking['status']}",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold)),

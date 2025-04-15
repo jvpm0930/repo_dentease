@@ -72,6 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'lastname': lastname,
         'phone': phone,
         'email': email,
+        'password':password,
         'role': selectedRole, // Store selected role
       });
 

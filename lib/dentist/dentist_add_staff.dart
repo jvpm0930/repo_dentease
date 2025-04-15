@@ -71,6 +71,7 @@ class _DentAddStaffState extends State<DentAddStaff> {
         'firstname': firstname,
         'lastname': lastname,
         'email': email,
+        'password': password,
         'phone': phone,
         'clinic_id': clinicId,
         'role': 'staff',

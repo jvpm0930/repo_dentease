@@ -96,6 +96,7 @@ class _DentalSignupState extends State<DentalSignup> {
         'firstname': firstname,
         'lastname': lastname,
         'email': email,
+        'password': password,
         'phone': phone,
         'clinic_id': clinicId, // Store clinic ID
         'role': selectedRole, // Store selected role

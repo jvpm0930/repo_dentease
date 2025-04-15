@@ -111,38 +111,49 @@ class _StaffBookingApprvPageState extends State<StaffBookingApprvPage> {
 
                 final bookings = snapshot.data!;
 
-                return ListView.builder(
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
+                return RefreshIndicator(
+                  onRefresh: _fetchBookings,
+                  child: ListView.builder(
+                    itemCount: bookings.length,
+                    itemBuilder: (context, index) {
+                      final booking = bookings[index];
 
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              booking['services']['service_name'],
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 5),
-                            Text("Date: ${formatDateTime(booking['date'])}"),
-                            const SizedBox(height: 5),
-                            Text("Status: ${booking['status']}",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ],
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(10),
+                          title: Text(
+                            booking['services']['service_name'],
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  "Patient: ${booking['patients']['firstname']}"),
+                              Text("Date: ${formatDateTime(booking['date'])}"),
+                              if (booking['clinics'] != null)
+                                Text(
+                                    "Clinic: ${booking['clinics']['clinic_name']}"),
+                              Text("Status: ${booking['status']}",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          trailing: const Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: Icon(Icons.info, color: Colors.blue),
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),
-          ),
+          )
         ],
       ),
     ));

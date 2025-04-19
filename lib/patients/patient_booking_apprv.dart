@@ -1,3 +1,4 @@
+import 'package:dentease/patients/patient_booking_details.dart';
 import 'package:dentease/patients/patient_booking_pend.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +32,7 @@ class _PatientBookingApprvState extends State<PatientBookingApprv> {
     setState(() {
       _bookingsFuture = supabase
           .from('bookings')
-          .select(
-              'booking_id, patient_id, service_id, clinic_id, date, status, services!inner(service_name), clinics!inner(clinic_name)')
+          .select('booking_id, patient_id, service_id, clinic_id, date, status, services(service_name, service_price), clinics(clinic_name), patients(firstname, lastname, email, phone)')
           .eq('status', 'approved')
           .eq('patient_id', widget.patientId);
     });
@@ -137,9 +137,23 @@ class _PatientBookingApprvState extends State<PatientBookingApprv> {
                                         fontWeight: FontWeight.bold)),
                               ],
                             ),
-                            trailing: const Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Icon(Icons.info, color: Colors.blue),
+                            trailing: GestureDetector(
+                              onTap: () {
+                                // Navigate to details page, passing the booking data
+                                final clinicId = booking['clinic_id'];
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PatientBookingDetailsPage(
+                                        booking: booking,
+                                        clinicId: clinicId),
+                                  ),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.only(right: 10),
+                                child: Icon(Icons.info, color: Colors.blue),
+                              ),
                             ),
                           ),
                         );

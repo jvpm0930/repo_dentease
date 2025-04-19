@@ -1,3 +1,4 @@
+import 'package:dentease/clinic/dentease_booking_details.dart';
 import 'package:dentease/dentist/dentist_bookings_pend.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,8 @@ String formatDateTime(String dateTime) {
 class DentistBookingApprvPage extends StatefulWidget {
   final String dentistId;
   final String clinicId;
-  const DentistBookingApprvPage({super.key, required this.dentistId, required this.clinicId});
+  const DentistBookingApprvPage(
+      {super.key, required this.dentistId, required this.clinicId});
 
   @override
   _DentistBookingApprvPageState createState() =>
@@ -32,20 +34,18 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
   Future<List<Map<String, dynamic>>> _fetchBookings() async {
     final response = await supabase
         .from('bookings')
-        .select(
-            'booking_id, patient_id, service_id, clinic_id, date, status, patients(firstname), services(service_name)')
+        .select('booking_id, patient_id, service_id, clinic_id, date, status, patients(firstname, lastname, email, phone), services(service_name, service_price)')
         .eq('status', 'approved')
-        .eq('clinic_id', widget.clinicId); // Filters bookings by clinicId
+        .eq('clinic_id', widget.clinicId);
 
     return response;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return BackgroundCont(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
+        child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text(
           "Approved Booking Request",
@@ -82,7 +82,8 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DentistBookingPendPage(clinicId: widget.clinicId,
+                          builder: (context) => DentistBookingPendPage(
+                              clinicId: widget.clinicId,
                               dentistId: widget.dentistId),
                         ),
                       );
@@ -143,9 +144,22 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
                                       fontWeight: FontWeight.bold)),
                             ],
                           ),
-                          trailing: const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: Icon(Icons.info, color: Colors.blue),
+                          trailing: GestureDetector(
+                            onTap: () {
+                              // Navigate to details page, passing the booking data
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BookingDetailsPage(
+                                      booking: booking,
+                                      clinicId: widget.clinicId),
+                                ),
+                              );
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: Icon(Icons.info, color: Colors.blue),
+                            ),
                           ),
                         ),
                       );
@@ -155,11 +169,8 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
               },
             ),
           )
-
         ],
       ),
-    )
-    );
-    
+    ));
   }
 }

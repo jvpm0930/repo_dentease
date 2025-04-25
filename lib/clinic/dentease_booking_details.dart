@@ -1,4 +1,5 @@
 import 'package:dentease/clinic/dentease_bills_page.dart';
+import 'package:dentease/clinic/dentease_edit_bills.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -64,28 +65,58 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                 const SizedBox(height: 20),
                 const Divider(thickness: 1.5, color: Colors.white),
                 const SizedBox(height: 20),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final patientId = booking['patient_id'];
-                      final bookingId = booking['booking_id'];
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final patientId = booking['patient_id'];
+                          final bookingId = booking['booking_id'];
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BillCalculatorPage(
-                              clinicId: widget.clinicId,
-                              patientId: patientId,
-                              bookingId: bookingId),
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BillCalculatorPage(
+                                clinicId: widget.clinicId,
+                                patientId: patientId,
+                                bookingId: bookingId,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
+                        child: const Text("Send Bill"),
+                      ),
                     ),
-                    child: const Text("Bill"),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final patientId = booking['patient_id'];
+                          final bookingId = booking['booking_id'];
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditBillPage(
+                                clinicId: widget.clinicId,
+                                patientId: patientId,
+                                bookingId: bookingId,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text("Edit Bill"),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 const Divider(thickness: 1.5, color: Colors.white),
@@ -107,7 +138,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
                     ),
                     child: const Text("Receipt"),

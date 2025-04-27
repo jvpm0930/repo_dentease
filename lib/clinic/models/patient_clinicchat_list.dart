@@ -1,4 +1,4 @@
-import 'package:dentease/models/patientchatpage.dart';
+import 'package:dentease/clinic/models/patientchatpage.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

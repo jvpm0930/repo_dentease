@@ -1,8 +1,4 @@
-import 'package:dentease/clinic/dentease_patientList.dart';
-import 'package:dentease/staff/staff_clinic_details.dart';
 import 'package:dentease/staff/staff_clinic_services.dart';
-import 'package:dentease/staff/staff_dentist_list.dart';
-import 'package:dentease/staff/staff_list.dart';
 import 'package:dentease/staff/staff_clinics_sched.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:dentease/widgets/staffWidgets/staff_footer.dart';
@@ -122,42 +118,6 @@ class _StaffPageState extends State<StaffPage> {
                 child: Column(
                   children: [
                     _buildCustomButton(
-                      title: "Clinic Patients",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ClinicPatientListPage(clinicId: clinicId!),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildCustomButton(
-                      title: "Clinic Dentists",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                StaffDentListPage(clinicId: clinicId!),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildCustomButton(
-                      title: "Clinic Staff",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                StaffListPage(clinicId: clinicId!),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildCustomButton(
                       title: "Clinic Services",
                       onTap: () {
                         Navigator.push(
@@ -180,18 +140,6 @@ class _StaffPageState extends State<StaffPage> {
                               clinicId: widget.clinicId,
                               staffId: widget.staffId,
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildCustomButton(
-                      title: "Clinic Details",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                StaffClinicPage(clinicId: clinicId!),
                           ),
                         );
                       },

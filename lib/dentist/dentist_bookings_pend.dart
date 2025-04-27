@@ -97,10 +97,10 @@ class _DentistBookingPendPageState extends State<DentistBookingPendPage> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed:
-                        null, // 🔹 Disable the "Approved" button in this page
+                        null, // 🔹 Disable the "Pending" button in this page
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[300], // Disabled background
-                      foregroundColor: Colors.grey[600], // Disabled text color
+                      foregroundColor: Colors.white, // Disabled text color
                     ),
                     child: const Text("Pending"),
                   ),

@@ -127,7 +127,7 @@ class _PatientBookingPageState extends State<PatientBookingPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Booking request sent! Awaiting approval.")),
+            content: Text("Booking request sent! Waiting for approval.")),
       );
 
       Navigator.pop(context);

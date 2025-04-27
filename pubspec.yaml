@@ -23,6 +23,9 @@ dependencies:
   image_picker: ^1.1.2
   chat_supabase: ^1.1.0
   geocoding: ^3.0.0
+  camera: ^0.10.5+9
+  path_provider: ^2.0.11
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
@@ -66,3 +69,4 @@ flutter:
     - assets/clinic1.png
     - assets/clinic2.png
     - assets/clinic3.png
+    - assets/sample_disease.png

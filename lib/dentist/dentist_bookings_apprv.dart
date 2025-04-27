@@ -70,7 +70,7 @@ class _DentistBookingApprvPageState extends State<DentistBookingApprvPage> {
                         null, //  Disable the "Approved" button in this page
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[300], // Disabled background
-                      foregroundColor: Colors.grey[600], // Disabled text color
+                      foregroundColor: Colors.white, // Disabled text color
                     ),
                     child: const Text("Approved"),
                   ),

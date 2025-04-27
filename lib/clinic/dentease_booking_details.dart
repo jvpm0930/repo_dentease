@@ -14,8 +14,11 @@ class BookingDetailsPage extends StatefulWidget {
   final Map<String, dynamic> booking;
   final String clinicId;
 
-  const BookingDetailsPage(
-      {super.key, required this.booking, required this.clinicId});
+  const BookingDetailsPage({
+    super.key,
+    required this.booking,
+    required this.clinicId,
+  });
 
   @override
   State<BookingDetailsPage> createState() => _BookingDetailsPageState();
@@ -23,6 +26,7 @@ class BookingDetailsPage extends StatefulWidget {
 
 class _BookingDetailsPageState extends State<BookingDetailsPage> {
   final supabase = Supabase.instance.client;
+
   @override
   Widget build(BuildContext context) {
     final booking = widget.booking;
@@ -36,9 +40,9 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
             style: TextStyle(color: Colors.white),
           ),
           centerTitle: true,
-          backgroundColor: Colors.transparent, // Transparent AppBar
-          elevation: 0, // Remove shadow
-          iconTheme: const IconThemeData(color: Colors.white), // White icons
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -121,7 +125,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                 const SizedBox(height: 20),
                 const Divider(thickness: 1.5, color: Colors.white),
                 const SizedBox(height: 20),
-                Expanded(
+                SizedBox(
+                  width: double.infinity, // Make the button full width
                   child: ElevatedButton(
                     onPressed: () {
                       final patientId = booking['patient_id'];
@@ -131,9 +136,10 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => BillCalculatorPage(
-                              clinicId: widget.clinicId,
-                              patientId: patientId,
-                              bookingId: bookingId),
+                            clinicId: widget.clinicId,
+                            patientId: patientId,
+                            bookingId: bookingId,
+                          ),
                         ),
                       );
                     },

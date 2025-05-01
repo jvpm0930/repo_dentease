@@ -13,6 +13,7 @@ class PatientHeader extends StatefulWidget {
 
 class _PatientHeaderState extends State<PatientHeader> {
   String? userEmail; // Stores logged-in user email
+  String? profileUrl; // Stores the patient's profile picture URL
 
   @override
   void initState() {
@@ -27,6 +28,31 @@ class _PatientHeaderState extends State<PatientHeader> {
       setState(() {
         userEmail = user.email; // Retrieve the email
       });
+
+      // Fetch dentist profile details
+      await _fetchProfileUrl(user.id);
+    }
+  }
+
+  // Fetch the dentist's profile picture URL from the database
+  Future<void> _fetchProfileUrl(String userId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('patients')
+          .select('profile_url')
+          .eq('patient_id', userId)
+          .single();
+
+      if (response['profile_url'] != null) {
+        setState(() {
+          // Add cache-busting timestamp to avoid old cached images
+          final url = response['profile_url'];
+          profileUrl =
+              '$url?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile URL: $e');
     }
   }
 
@@ -79,9 +105,18 @@ class _PatientHeaderState extends State<PatientHeader> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
+                  // Profile Picture with Fallback
+                  CircleAvatar(
                     radius: 30,
-                    backgroundImage: AssetImage('assets/profile.png'),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage:
+                        profileUrl != null && profileUrl!.isNotEmpty
+                            ? NetworkImage(profileUrl!) // Load from Supabase
+                            : const AssetImage('assets/profile.png')
+                                as ImageProvider, // Fallback image
+                    child: profileUrl == null || profileUrl!.isEmpty
+                        ? const Icon(Icons.person, size: 30, color: Colors.grey)
+                        : null,
                   ),
                   const SizedBox(height: 8),
                   // Display Email if Available

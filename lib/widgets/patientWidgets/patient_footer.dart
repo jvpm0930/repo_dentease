@@ -1,6 +1,6 @@
 import 'package:dentease/clinic/models/patient_clinicchat_list.dart';
 import 'package:dentease/clinic/scanner/camera.dart';
-import 'package:dentease/patients/patient_booking_apprv.dart';
+import 'package:dentease/patients/patient_booking_pend.dart';
 import 'package:dentease/patients/patient_pagev2.dart';
 import 'package:dentease/patients/patient_profile.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class PatientFooter extends StatelessWidget {
               children: [
                 _buildNavImage('assets/icons/home.png', context, PatientPage()),
                 _buildNavImage('assets/icons/calendar.png', context,
-                    PatientBookingApprv(patientId: patientId)),
+                    PatientBookingPend(patientId: patientId)),
                 _buildNavImage('assets/icons/scan.png', context, ToothScannerPage()),
                 _buildNavImage('assets/icons/chat.png', context, PatientClinicChatList(patientId: patientId)),
                 _buildNavImage(

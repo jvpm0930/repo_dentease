@@ -128,7 +128,7 @@ class _EditBillPageState extends State<EditBillPage> {
                       Icons.design_services),
                   const SizedBox(height: 12),
                   _buildTextField(servicePriceController, 'Service Price',
-                      Icons.attach_money,
+                      Icons.money,
                       number: true),
                   const SizedBox(height: 12),
                   _buildTextField(receivedMoneyController, 'Received Money',
@@ -137,7 +137,7 @@ class _EditBillPageState extends State<EditBillPage> {
                   const SizedBox(height: 20),
                   if (change != null)
                     Text(
-                      "Change: \$${change!.toStringAsFixed(2)}",
+                      "Change: ${change!.toStringAsFixed(2)} php",
                       style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

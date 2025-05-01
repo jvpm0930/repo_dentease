@@ -88,7 +88,7 @@ class _PatientBookingDetailsPageState extends State<PatientBookingDetailsPage> {
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text("Service price: ${booking['services']['service_price']}"),
+                Text("Service price: ${booking['services']['service_price']} php"),
                 const SizedBox(height: 8),
                 Text("Clinic name: ${booking['clinics']['clinic_name']}"),
                 const SizedBox(height: 8),
@@ -117,14 +117,12 @@ class _PatientBookingDetailsPageState extends State<PatientBookingDetailsPage> {
                                     color: Colors.black),
                               ),
                               const SizedBox(height: 8),
-                              Text("Service: ${bill!['service_name']}"),
-                              const SizedBox(height: 4),
                               Text(
-                                  "Service Price: \$${bill!['service_price']}"),
+                                  "Service Price: ${bill!['service_price']} php"),
                               const SizedBox(height: 4),
-                              Text("Received: \$${bill!['recieve_money']}"),
+                              Text("Received: ${bill!['recieve_money']} php"),
                               const SizedBox(height: 4),
-                              Text("Change: \$${bill!['bill_change']}"),
+                              Text("Change: ${bill!['bill_change']} php"),
                             ],
                           )
                         : const Text(

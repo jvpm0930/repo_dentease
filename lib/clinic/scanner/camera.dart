@@ -1,4 +1,3 @@
-
 import 'package:camera/camera.dart';
 import 'package:dentease/clinic/scanner/result.dart';
 import 'package:flutter/material.dart';

@@ -56,7 +56,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text("Service price: ${booking['services']['service_price']}"),
+                Text("Service price: ${booking['services']['service_price']} php"),
                 const SizedBox(height: 8),
                 Text(
                     "Patient name: ${booking['patients']['firstname']} ${booking['patients']['lastname']}"),
@@ -131,7 +131,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                     onPressed: () {
                       final patientId = booking['patient_id'];
                       final bookingId = booking['booking_id'];
-
+                      /*
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -142,6 +142,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                           ),
                         ),
                       );
+                      */
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,

@@ -6,11 +6,12 @@ class BillCalculatorPage extends StatefulWidget {
   final String patientId;
   final String bookingId;
 
-  const BillCalculatorPage(
-      {super.key,
-      required this.clinicId,
-      required this.patientId,
-      required this.bookingId});
+  const BillCalculatorPage({
+    super.key,
+    required this.clinicId,
+    required this.patientId,
+    required this.bookingId,
+  });
 
   @override
   State<BillCalculatorPage> createState() => _BillCalculatorPageState();
@@ -19,9 +20,9 @@ class BillCalculatorPage extends StatefulWidget {
 class _BillCalculatorPageState extends State<BillCalculatorPage> {
   final supabase = Supabase.instance.client;
 
-  final TextEditingController serviceNameController = TextEditingController();
-  final TextEditingController servicePriceController = TextEditingController();
-  final TextEditingController receivedMoneyController = TextEditingController();
+  final serviceNameController = TextEditingController();
+  final servicePriceController = TextEditingController();
+  final receivedMoneyController = TextEditingController();
 
   double? change;
   String? patientName;
@@ -56,15 +57,9 @@ class _BillCalculatorPageState extends State<BillCalculatorPage> {
     final price = double.tryParse(servicePriceController.text);
     final received = double.tryParse(receivedMoneyController.text);
 
-    if (price != null && received != null) {
-      setState(() {
-        change = received - price;
-      });
-    } else {
-      setState(() {
-        change = null;
-      });
-    }
+    setState(() {
+      change = (price != null && received != null) ? (received - price) : null;
+    });
   }
 
   Future<void> _submitBill() async {
@@ -72,31 +67,53 @@ class _BillCalculatorPageState extends State<BillCalculatorPage> {
     final servicePrice = double.tryParse(servicePriceController.text);
     final receivedMoney = double.tryParse(receivedMoneyController.text);
 
-    if (serviceName.isEmpty ||
-        servicePrice == null ||
-        receivedMoney == null ||
-        receivedMoney < servicePrice) {
+    if (serviceName.isEmpty || servicePrice == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter valid data")),
+        const SnackBar(content: Text("Please enter valid service data.")),
       );
       return;
     }
 
-    final billChange = receivedMoney - servicePrice;
-
     try {
-      await supabase.from('bills').insert({
+      // Check if a bill already exists for this booking_id
+      final existingBill = await supabase
+          .from('bills')
+          .select()
+          .eq('booking_id', widget.bookingId)
+          .maybeSingle();
+
+      if (existingBill != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("A bill already exists for this booking.")),
+        );
+        return;
+      }
+
+      final billChange =
+          receivedMoney != null ? (receivedMoney - servicePrice) : null;
+
+      final billData = {
         'service_name': serviceName,
         'service_price': servicePrice,
-        'recieve_money': receivedMoney,
-        'bill_change': billChange,
         'clinic_id': widget.clinicId,
         'patient_id': widget.patientId,
         'booking_id': widget.bookingId,
-      });
+      };
+
+      if (receivedMoney != null) {
+        billData['recieved_money'] = receivedMoney;
+        if (billChange != null) {
+          billData['bill_change'] = billChange;
+        } else {
+          const SnackBar(content: Text("bill change = null"));
+        }
+      }
+
+      await supabase.from('bills').insert(billData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bill submitted successfully")),
+        const SnackBar(content: Text("Bill submitted successfully.")),
       );
 
       serviceNameController.clear();
@@ -107,10 +124,11 @@ class _BillCalculatorPageState extends State<BillCalculatorPage> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
+        SnackBar(content: Text("Submission failed: ${e.toString()}")),
       );
     }
   }
+
 
   @override
   void dispose() {
@@ -123,7 +141,9 @@ class _BillCalculatorPageState extends State<BillCalculatorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Bill for ${patientName ?? 'Loading...'}")),
+      appBar: AppBar(
+        title: Text("Bill for ${patientName ?? 'Loading...'}"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -132,11 +152,11 @@ class _BillCalculatorPageState extends State<BillCalculatorPage> {
                 serviceNameController, 'Service Name', Icons.design_services),
             const SizedBox(height: 12),
             _buildTextField(
-                servicePriceController, 'Service Price', Icons.attach_money,
+                servicePriceController, 'Service Price', Icons.money,
                 number: true),
             const SizedBox(height: 12),
             _buildTextField(
-                receivedMoneyController, 'Received Money', Icons.money_rounded,
+                receivedMoneyController, 'Received Money', Icons.attach_money,
                 number: true),
             const SizedBox(height: 20),
             if (change != null)
@@ -153,7 +173,7 @@ class _BillCalculatorPageState extends State<BillCalculatorPage> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
               child: const Text("Submit Bill",
                   style: TextStyle(color: Colors.white)),
-            )
+            ),
           ],
         ),
       ),

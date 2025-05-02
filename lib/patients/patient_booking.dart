@@ -1,3 +1,4 @@
+import 'package:dentease/patients/patient_feedbackPage.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -112,7 +113,7 @@ class _PatientBookingPageState extends State<PatientBookingPage> {
     );
 
     int startTime = selectedTime!.hour;
-    int endTime = startTime + 1; // End time is one hour later
+    int endTime = startTime + 1;
 
     try {
       await supabase.from('bookings').insert({
@@ -120,17 +121,18 @@ class _PatientBookingPageState extends State<PatientBookingPage> {
         'clinic_id': widget.clinicId,
         'service_id': widget.serviceId,
         'date': appointmentDateTime.toIso8601String(),
-        'start_time': startTime.toString(), // Store the selected time
-        'end_time': endTime.toString(), // Store one hour later
+        'start_time': startTime.toString(),
+        'end_time': endTime.toString(),
         'status': 'pending',
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Booking request sent! Waiting for approval.")),
+      // Navigate to a success page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PatientFeedbackpage(clinicId: widget.clinicId),
+        ),
       );
-
-      Navigator.pop(context);
     } catch (e) {
       setState(() {
         errorMessage = "Error booking service: $e";
@@ -141,6 +143,7 @@ class _PatientBookingPageState extends State<PatientBookingPage> {
       });
     }
   }
+
 
 
   /// Show available time slots dialog

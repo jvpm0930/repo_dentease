@@ -1,8 +1,8 @@
 import 'package:dentease/patients/patient_booking.dart';
+import 'package:dentease/patients/patient_feedbackPage.dart';
 import 'package:dentease/widgets/background_cont.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PatientClinicInfoPage extends StatefulWidget {
   final String clinicId;
@@ -17,8 +17,10 @@ class _PatientClinicInfoPageState extends State<PatientClinicInfoPage> {
   final supabase = Supabase.instance.client;
   Map<String, dynamic>? clinic;
   List<Map<String, dynamic>> services = [];
+  List<Map<String, dynamic>> reviews = [];
   bool isLoading = true;
   String errorMessage = '';
+
 
   @override
   void initState() {
@@ -26,13 +28,13 @@ class _PatientClinicInfoPageState extends State<PatientClinicInfoPage> {
     _fetchClinicDetails();
   }
 
-  /// **🔹 Fetch clinic details and approved services**
+  /// **🔹 Fetch clinic details and approved services with feedbacks**
   Future<void> _fetchClinicDetails() async {
     try {
       // Fetch clinic details
       final clinicResponse = await supabase
           .from('clinics')
-          .select('clinic_name, info, address, latitude, longitude')
+          .select('clinic_name, info, address, profile_url')
           .eq('clinic_id', widget.clinicId)
           .maybeSingle();
 
@@ -42,10 +44,17 @@ class _PatientClinicInfoPageState extends State<PatientClinicInfoPage> {
           .select('service_id, service_name, service_price')
           .eq('clinic_id', widget.clinicId)
           .eq('status', 'approved'); // Only approved services
+      
+      final response = await supabase
+          .from('feedbacks')
+          .select('rating, feedback, patient_id, patients(firstname, lastname, profile_url)')
+          .eq('clinic_id', widget.clinicId)
+          .order('created_at', ascending: false);
 
       setState(() {
         clinic = clinicResponse;
         services = List<Map<String, dynamic>>.from(servicesResponse);
+        reviews = List<Map<String, dynamic>>.from(response);
         isLoading = false;
       });
     } catch (e) {
@@ -56,160 +65,297 @@ class _PatientClinicInfoPageState extends State<PatientClinicInfoPage> {
     }
   }
 
-  /// **🔹 Opens Google Maps app with navigation**
-  void _openGoogleMaps(double lat, double lon) async {
-    final url = "https://www.google.com/maps/search/?api=1&query=$lat,$lon";
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Could not open Google Maps.")),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return BackgroundCont(
-        child: Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text(
-          "Clinic Info and Services",
-          style: TextStyle(color: Colors.white),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.black,
+          elevation: 0.5,
+          title: const Text('Clinic Info'),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent, // Transparent AppBar
-        elevation: 0, // Remove shadow
-        iconTheme: const IconThemeData(color: Colors.white), // White icons
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : errorMessage.isNotEmpty
-              ? Center(
-                  child: Text(errorMessage,
-                      style: const TextStyle(color: Colors.red)))
-              : clinic == null
-                  ? const Center(child: Text("Clinic not found"))
-                  : SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Clinic Name
-                            Text(
-                              clinic!['clinic_name'] ?? 'Unknown Clinic',
-                              style: const TextStyle(
-                                  fontSize: 22, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 10),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : errorMessage.isNotEmpty
+                ? Center(
+                    child: Text(errorMessage,
+                        style: const TextStyle(color: Colors.red)))
+                : clinic == null
+                    ? const Center(child: Text("Clinic not found"))
+                    : DefaultTabController(
+                        length: 2,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Clinic image
+                              SizedBox(
+                                width: double.infinity,
+                                height: 300,
+                                child: clinic!['profile_url'] != null &&
+                                        clinic!['profile_url']
+                                            .toString()
+                                            .isNotEmpty
+                                    ? Image.network(
+                                        clinic!['profile_url'],
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Container(
+                                            color: Colors.grey[300],
+                                            child: const Center(
+                                                child: Icon(
+                                                    Icons.image_not_supported)),
+                                          );
+                                        },
+                                      )
+                                    : Container(
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                            child: Icon(Icons.image,
+                                                size: 60, color: Colors.white)),
+                                      ),
+                              ),
 
-                            // Clinic Info
-                            Text(
-                              clinic!['info'] ?? 'No clinic info available',
-                              style: const TextStyle(
-                                  fontSize: 16, color: Colors.black),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Clinic Address
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on,
-                                    color: Colors.red),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    clinic!['address'] ??
-                                        'No address available',
-                                    style: const TextStyle(
-                                        fontSize: 16, color: Colors.black),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-
-                            // Map Display
-                            if (clinic!['latitude'] != null &&
-                                clinic!['longitude'] != null)
-                              GestureDetector(
-                                onTap: () => _openGoogleMaps(
-                                  clinic!['latitude'],
-                                  clinic!['longitude'],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    "https://maps.googleapis.com/maps/api/staticmap?"
-                                    "center=${clinic!['latitude']},${clinic!['longitude']}"
-                                    "&zoom=15&size=400x300&maptype=roadmap"
-                                    "&markers=color:red%7C${clinic!['latitude']},${clinic!['longitude']}"
-                                    "&key=AIzaSyBg-fAm25WSVmO768I42gecvL80vuJiuh4", // Replace with your API key
-                                    width: double.infinity,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            Image.asset(
-                                                'assets/placeholder_map.png',
-                                                fit: BoxFit.cover),
-                                  ),
+                              // Clinic Name & Address below image
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      clinic!['clinic_name'] ??
+                                          'Unknown Clinic',
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on,
+                                            color: Colors.redAccent, size: 18),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            clinic!['address'] ?? 'No address',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                            const SizedBox(height: 20),
 
-                            // Services List
-                            const Text(
-                              "Services Offered:",
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 10),
-                            services.isEmpty
-                                ? const Text(
-                                    "No approved services available.",
-                                    style: TextStyle(color: Colors.grey),
-                                  )
-                                : ListView.builder(
-                                    shrinkWrap:
-                                        true, // Ensures ListView takes only required space
-                                    physics:
-                                        const NeverScrollableScrollPhysics(), // Disable inner scrolling
-                                    itemCount: services.length,
-                                    itemBuilder: (context, index) {
-                                      final service = services[index];
-                                      return Card(
-                                        child: ListTile(
-                                          title: Text(service['service_name']),
-                                          subtitle: Text(
-                                              "Price: ${service['service_price']} PHP"),
-                                          leading: const Icon(
-                                              Icons.medical_services),
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PatientBookingPage(
-                                                  serviceId: service[
-                                                      'service_id'], // Ensure your database has 'id' for services
-                                                  serviceName:
-                                                      service['service_name'],
-                                                  clinicId: widget.clinicId,
+                              // TabBar
+                              Container(
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                      bottom: BorderSide(
+                                          color: Colors.grey, width: 0.5)),
+                                ),
+                                child: const TabBar(
+                                  tabs: [
+                                    Tab(text: 'Services'),
+                                    Tab(text: 'Reviews'),
+                                  ],
+                                  labelColor: Colors.black,
+                                  indicatorColor: Colors.blueAccent,
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: 400, // Fixed height for tab content
+                                child: TabBarView(
+                                  children: [
+                                    // SERVICES TAB
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: services.isEmpty
+                                          ? const Text(
+                                              "No approved services available.",
+                                              style:
+                                                  TextStyle(color: Colors.grey))
+                                          : Column(
+                                              children: services.map((service) {
+                                                return Container(
+                                                  margin: const EdgeInsets.only(
+                                                      bottom: 12),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    border: Border.all(
+                                                        color: Colors
+                                                            .grey.shade300),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.1),
+                                                        blurRadius: 4,
+                                                        offset:
+                                                            const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: ListTile(
+                                                    contentPadding:
+                                                        EdgeInsets.zero,
+                                                    leading: const Icon(
+                                                        Icons.medical_services,
+                                                        color: Colors.blueAccent),
+                                                    title: Text(service[
+                                                        'service_name']),
+                                                    subtitle: Text(
+                                                        "Price: ${service['service_price']} php"),
+                                                    onTap: () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              PatientBookingPage(
+                                                            serviceId: service[
+                                                                'service_id'],
+                                                            serviceName: service[
+                                                                'service_name'],
+                                                            clinicId:
+                                                                widget.clinicId,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                    ),
+
+                                    // Reviews Tab
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          // Add Review button
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PatientFeedbackpage(
+                                                          clinicId:
+                                                              widget.clinicId),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                          ],
+                                              ).then((_) =>
+                                                  _fetchClinicDetails()); // refresh on return
+                                            },
+                                            icon: const Icon(Icons.feedback),
+                                            label: const Text("Add Review"),
+                                          ),
+                                          const SizedBox(height: 16),
+
+                                          // Feedback List
+                                          reviews.isEmpty
+                                              ? const Text(
+                                                  "No feedbacks available.",
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                )
+                                              : Column(
+                                                  children:reviews.map((review) {
+                                                    return Container(
+                                                      margin: const EdgeInsets.only(bottom: 12),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 12),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        border: Border.all(color: Colors.grey.shade300),
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: Colors.grey.withOpacity(0.1),
+                                                            blurRadius: 4,
+                                                            offset:const Offset(0, 2),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      child: ListTile(
+                                                        contentPadding:
+                                                            EdgeInsets.zero,
+                                                        leading: CircleAvatar(
+                                                          radius: 24,
+                                                          backgroundColor:
+                                                              Colors.grey[200],
+                                                          backgroundImage: review['patients'] != null &&
+                                                                  review['patients']['profile_url'] != null &&
+                                                                  review['patients']['profile_url'].toString().isNotEmpty
+                                                              ? NetworkImage(review['patients']['profile_url'])
+                                                              : null,
+                                                          child: review['patients'] != null &&
+                                                                  (review['patients']['profile_url'] == null || 
+                                                                  review['patients']['profile_url'].toString().isEmpty)
+                                                              ? const Icon(Icons.person, color: Colors.grey)
+                                                              : null,
+                                                        ),
+                                                        title: Text(
+                                                          review['patients'] != null
+                                                              ? '${review['patients']['firstname']} ${review['patients']['lastname']}'
+                                                              : 'Anonymous',
+                                                          style: const TextStyle(fontWeight:FontWeight.bold),
+                                                        ),
+                                                        subtitle: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                          children: [
+                                                            Row(
+                                                              children:List.generate(
+                                                                5,
+                                                                (index) => Icon(
+                                                                  index <
+                                                                          int.tryParse(review['rating']
+                                                                              .toString())!
+                                                                      ? Icons.star
+                                                                      : Icons.star_border,
+                                                                  color: Colors.amber,
+                                                                  size: 18,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            const SizedBox(height: 4),
+                                                            Text(review['feedback'] ?? ''),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                        ],
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-    ));
+      ),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dentease/patients/patient_pagev2.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -41,6 +42,21 @@ class _PatientFeedbackpageState extends State<PatientFeedbackpage> {
     });
 
     try {
+      // Check if the user already submitted feedback for this clinic
+      final existing = await supabase
+          .from('feedbacks')
+          .select()
+          .eq('patient_id', user.id)
+          .eq('clinic_id', widget.clinicId)
+          .maybeSingle();
+
+      if (existing != null) {
+        setState(() {
+          errorMessage = "You have already submitted feedback for this clinic.";
+        });
+        return;
+      }
+
       await supabase.from('feedbacks').insert({
         'rating': selectedRating,
         'feedback': feedbackController.text.trim(),
@@ -63,6 +79,7 @@ class _PatientFeedbackpageState extends State<PatientFeedbackpage> {
       });
     }
   }
+
 
   Widget buildStar(int index) {
     return IconButton(
@@ -119,6 +136,20 @@ class _PatientFeedbackpageState extends State<PatientFeedbackpage> {
                     onPressed: submitFeedback,
                     child: const Text("Submit Feedback"),
                   ),
+            const SizedBox(height: 16),
+             ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PatientPage(),
+                  ),
+                ); // refresh on return
+              },
+              icon: const Icon(Icons.feedback),
+              label: const Text("Not Now"),
+            ),
           ],
         ),
       ),

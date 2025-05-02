@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey[300], // Light grey background
-          hintStyle: TextStyle(color: Colors.indigo[900]), // Dark blue text
+          hintStyle: TextStyle(color: Colors.blueAccent), // Dark blue text
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30), // Rounded corners
             borderSide: BorderSide.none, // No border

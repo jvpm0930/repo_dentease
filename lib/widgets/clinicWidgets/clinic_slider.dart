@@ -12,6 +12,8 @@ class ClinicCarousel extends StatefulWidget {
 class _ClinicCarouselState extends State<ClinicCarousel> {
   final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> clinics = [];
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
   bool isLoading = true;
   String errorMessage = '';
 
@@ -58,37 +60,70 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
               style: TextStyle(color: Colors.grey)));
     }
 
-    return SizedBox(
-      height: 250, // Adjust height as needed
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: clinics.length,
-        itemBuilder: (context, index) {
-          final clinic = clinics[index];
-          final clinicName = clinic['clinic_name'] ?? 'Unknown Clinic';
-          final profileUrl =
-              clinic['profile_url'] as String?; // Get profile URL
+    final filteredClinics = clinics.where((clinic) {
+      final name = clinic['clinic_name']?.toString().toLowerCase() ?? '';
+      return name.contains(searchQuery.toLowerCase());
+    }).toList();
 
-          return GestureDetector(
-            onTap: () {
-              // Navigate to the details page with only clinic_id
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      PatientClinicInfoPage(clinicId: clinic['clinic_id']),
+    return SafeArea(
+      child: SingleChildScrollView(
+        // Add scroll view
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //const SizedBox(height: 10), // 🔹 Extra top padding
+            /*
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  labelText: 'Search Clinics',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
                 ),
-              );
-            },
-            child: _buildClinicCard(context, clinicName, profileUrl),
-          );
-        },
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+              ),
+            ),
+            */
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 250,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: filteredClinics.length,
+                itemBuilder: (context, index) {
+                  final clinic = filteredClinics[index];
+                  final clinicName = clinic['clinic_name'] ?? 'Unknown Clinic';
+                  final profileUrl = clinic['profile_url'] as String?;
 
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientClinicInfoPage(
+                              clinicId: clinic['clinic_id']),
+                        ),
+                      );
+                    },
+                    child: _buildClinicCard(context, clinicName, profileUrl),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-    /// Creates a Clickable Clinic Card
+
+  /// Creates a Clickable Clinic Card
   Widget _buildClinicCard(
       BuildContext context, String title, String? profileUrl) {
     return Container(
@@ -154,5 +189,4 @@ class _ClinicCarouselState extends State<ClinicCarousel> {
       ),
     );
   }
-
 }

@@ -103,56 +103,59 @@ class _PatientFeedbackpageState extends State<PatientFeedbackpage> {
         title: const Text("Rate Clinic"),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("How was your experience?",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Row(
-              children: List.generate(5, (index) => buildStar(index + 1)),
-            ),
-            const SizedBox(height: 20),
-            const Text("Leave a feedback:",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            TextField(
-              controller: feedbackController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "Write your feedback here...",
+      resizeToAvoidBottomInset: true, // Important to prevent overflow
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("How was your experience?",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Row(
+                children: List.generate(5, (index) => buildStar(index + 1)),
               ),
-            ),
-            const SizedBox(height: 20),
-            if (errorMessage != null)
-              Text(errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14)),
-            const SizedBox(height: 10),
-            isSubmitting
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: submitFeedback,
-                    child: const Text("Submit Feedback"),
-                  ),
-            const SizedBox(height: 16),
-             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        PatientPage(),
-                  ),
-                ); // refresh on return
-              },
-              icon: const Icon(Icons.feedback),
-              label: const Text("Not Now"),
-            ),
-          ],
+              const SizedBox(height: 20),
+              const Text("Leave a feedback:",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              TextField(
+                controller: feedbackController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Write your feedback here...",
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (errorMessage != null)
+                Text(errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 14)),
+              const SizedBox(height: 10),
+              isSubmitting
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: submitFeedback,
+                      child: const Text("Submit Feedback"),
+                    ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PatientPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.feedback),
+                label: const Text("Not Now"),
+              ),
+            ],
+          ),
         ),
       ),
     );
+
   }
 }
